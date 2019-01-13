@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.group.wallet.mapper.HomeMapper">
+
+ <!-- 添加地址 -->
+ <insert id="addAddress" useGeneratedKeys="true" keyProperty="id">
+ 	INSERT INTO wallet_address_zcc 
+	(user_id,type,name,telephone,city,address,create_time)
+	VALUES (#{userId},#{type},#{name},#{telephone},#{city},#{address},now())
+ </insert> 
+ <!-- 删除地址 -->
+ <delete id="deleteAddress">
+ 	delete from wallet_address_zcc 
+ 	where id=#{id}
+ </delete> 
+ <!-- 更新地址 -->
+ <update id="updateAddress">
+		update wallet_address_zcc
+			<set>
+		 		<if test="name != null">
+		 			name=#{name},
+		 		</if>
+		 		<if test="telephone != null">
+		 			telephone=#{telephone},
+		 		</if>
+		 		<if test="city != null">
+		 			city=#{city},
+		 		</if>
+		 		<if test="type != null">
+		 			type=#{type},
+		 		</if>
+		 		<if test="address != null">
+		 			address=#{address},
+		 		</if>
+		 		update_time=now()
+		 	</set>
+  		WHERE id =#{id}
+ </update>
+ <!-- 设置为默认地址 -->
+ <update id="updateAddressByMode">
+		update wallet_address_zcc
+			set type=1
+  		WHERE user_id =#{userId};
+  		update wallet_address_zcc
+			set type=0
+  		WHERE user_id =#{userId} and id=#{id};
+ </update>
+ <update id="updateAddressByUser">
+  		update wallet_address_zcc
+			set type=1
+  		WHERE user_id =#{userId}
+ </update>
+ <!-- 获取地址列表 -->
+ <select id="getAddress" resultType="com.group.wallet.model.vo.Adress">
+ 	SELECT 
+ 		id,user_id AS userId,TYPE,NAME,telephone,city,address,create_time AS createTime,update_time AS updateTime
+ 	FROM wallet_address_zcc 
+ 	<where>
+ 		<if test="userId != null">
+ 			and user_id=#{userId}
+ 		</if>
+ 		<if test="id != null">
+ 			and id=#{id}
+ 		</if>
+ 	</where>
+ </select>
+ <!-- 获取POS机器列表 -->
+ <select id="getShopList" resultType="com.group.wallet.model.vo.Shop">
+ 	SELECT id,app,TYPE,title,active_amount AS activeAmount,active_back AS activeBack,comp_back AS compBack,
+		comp_require AS compRequire,rate,pay_company AS payCompany,image,content,introduce,
+		update_time AS updateTime,create_time AS createTime
+ 	FROM wallet_shop_zcc
+ 	<where>
+ 		<if test="type!=null">
+ 			and type=#{type}
+ 		</if>
+ 		<if test="id != null">
+ 			and id=#{id}
+ 		</if>
+ 	</where>
+ </select>
+ <!-- 创建订单 -->
+ <insert id="addShopOrder" useGeneratedKeys="true" keyProperty="id">
+ 	INSERT INTO wallet_shop_order_zcc 
+	(order_num,user_id,shop_id,shop_name,shop_image,unit_price,COUNT,total_price,state,receive_man,link_tel,receive_address,create_time)
+	VALUES (#{orderNum},#{userId},#{shopId},#{shopName},#{shopImage},#{unitPrice},#{count},#{totalPrice},#{state},#{receiveMan},#{linkTel},#{receiveAddress},now())
+ </insert> 
+ <!-- 获取订单列表 -->
+ <select id="getShopOrderList" resultType="com.group.wallet.model.vo.ShopOrder">
+ 	SELECT id,order_num AS orderNum,user_id AS userId,shop_id as shopId,shop_image as shopImage,shop_name as shopName,unit_price AS unitPrice,COUNT,total_price AS totalPrice,state,pay_way AS payWay,
+ 		pay_time AS payTime,express_company AS expressCompany,express_number AS expressNumber,
+		receive_man AS receiveMan,link_tel AS linkTel,receive_address AS receiveAddress,create_time AS createTime
+	FROM wallet_shop_order_zcc
+ 	<where>
+ 		<if test="orderNum!=null">
+ 			and order_num=#{orderNum}
+ 		</if>
+ 		<if test="userId!=null">
+ 			and user_id=#{userId}
+ 		</if>
+ 		<if test="state!=null">
+ 			and state=#{state}
+ 		</if>
+ 		<if test="id != null">
+ 			and id=#{id}
+ 		</if>
+ 	</where>
+ </select>
+ <!-- 更新订单 -->
+ <update id="updateShopOrder">
+		update wallet_shop_order_zcc
+			<set>
+		 		<if test="state != null">
+		 			state=#{state},
+		 		</if>
+		 		<if test="payWay != null">
+		 			pay_way=#{payWay},
+		 		</if>
+		 		<if test="payTime != null">
+		 			pay_time=#{payTime},
+		 		</if>
+		 	</set>
+  		<where>
+	 		<if test="orderNum!=null">
+	 			and order_num=#{orderNum}
+	 		</if>
+	 		<if test="id != null">
+	 			and id=#{id}
+	 		</if>
+	 	</where>
+ </update>
+ <!-- 获取POS列表 -->
+ <select id="getPosList" resultType="com.group.wallet.model.vo.Pos">
+ 	SELECT id,user_id AS userId,active_user_id AS activeUserId,ACTION,TYPE,STATUS,logo,brand,sn,back_amt AS backAmt,
+ 			reach,limitnum,comp_amt as compAmt,amt,user_name as userName,
+ 			back_time AS backTime,active_time AS activeTime,update_time AS updateTime,create_time AS createTime
+ 	FROM wallet_pos_zcc 
+ 	<where>
+ 		<if test="userId!=null">
+ 			and user_id=#{userId}
+ 		</if>
+ 		<if test="activeUserId!=null">
+ 			and active_user_id=#{activeUserId}
+ 		</if>
+ 		<if test="brand != null">
+ 			and brand=#{brand}
+ 		</if>
+ 		<if test="type != null">
+ 			and type=#{type}
+ 		</if>
+ 		<if test="sn != null">
+ 			and sn=#{sn}
+ 		</if>
+ 		<if test="action != null">
+ 			<if test="action != 0">
+	 			and action=#{action}
+	 		</if>
+	 		<if test="action == 0">
+	 			and (action=0 or action=3)
+	 		</if>
+ 		</if>
+ 		<if test="status != null">
+ 			and status=#{status}
+ 		</if>
+ 		<if test="reach != null">
+ 			and reach=#{reach}
+ 		</if>
+ 	</where>
+ </select>
+ <!-- 更新POS -->
+ <update id="updatePos">
+		update wallet_pos_zcc
+			<set>
+		 		<if test="activeUserId != null">
+		 			active_user_id=#{activeUserId},
+		 		</if>
+		 		<if test="action != null">
+		 			<!-- 同意召回 -->
+		 			<if test="action == 3">
+		 				active_user_id=user_id,
+		 				action = #{action},
+		 			</if>
+		 			<if test="action == 1">
+		 				action = #{action},
+		 			</if>
+		 			<if test="action == 2">
+		 				action = #{action},
+		 			</if>
+		 			<if test="action == 4">
+		 				action = 1,
+		 			</if>
+		 		</if>
+		 		<if test="reach != null">
+		 			reach=#{reach},
+		 		</if>
+		 		<if test="status != null">
+		 			status=#{status},
+		 		</if>
+		 		<if test="activeTime != null">
+		 			active_time=now(),
+		 		</if>
+		 		<if test="backTime != null">
+		 			back_time=now(),
+		 		</if>
+		 		update_time=now()
+		 	</set>
+  		<where>
+	 		<if test="sn !=null">
+	 			and sn=#{sn}
+	 		</if>
+	 		<if test="id != null">
+	 			and id=#{id}
+	 		</if>
+	 		<if test="action == 1">
+		 		and (action=0 or action=3)
+		 	</if>
+		 	<if test="action == 2">
+		 		and action=1
+		 	</if>
+		 	<if test="action == 3">
+		 		and action=2
+		 	</if>
+		 	<if test="action == 4">
+		 		and action=2
+		 	</if>
+	 	</where>
+ </update>
+ 
+ <!-- 更新交易数据    分润状态 -->
+ <update id="updateBusinessDataList">
+ 	<foreach collection="list" item="item" separator=";">
+		update wallet_business_zcc
+			<set>
+		 		<if test="item.status != null">
+		 			status=#{item.status},
+		 		</if>
+		 		<if test="item.userId != null">
+		 			user_id=#{item.userId},
+		 		</if>
+		 		update_time=now()
+		 	</set>
+  		<where>
+	 		<if test="item.id !=null">
+	 			and id=#{item.id}
+	 		</if>
+	 	</where>
+	 </foreach>
+ </update>
+ <!-- 更新POS -->
+ <update id="updatePosList">
+ 	<foreach collection="list" item="item" separator=";">
+		update wallet_pos_zcc
+			<set>
+		 		<if test="item.reach != null">
+		 			reach=#{item.reach},
+		 		</if>
+		 		<if test="item.status != null">
+		 			status=#{item.status},
+		 		</if>
+		 		<if test="item.activeTime != null">
+		 			active_time=#{item.activeTime},
+		 		</if>
+		 		update_time=now()
+		 	</set>
+  		<where>
+	 		<if test="item.sn !=null">
+	 			and sn=#{item.sn}
+	 		</if>
+	 	</where>
+	 </foreach>
+ </update>
+<!-- 获取 交易记录 列表   AND sn IN (SELECT sn FROM wallet_pos_zcc WHERE active_user_id = #{remark} OR active_user_id = #{remark2}) -->
+ <select id="getBusinessDataList" resultType="com.group.wallet.model.vo.BusinessData">
+ 	
+	 	SELECT id,STATUS,remark,remark2,remark3,amt,sn,create_time AS createTime,user_id AS userId,business_time AS businessTime 
+	 	FROM wallet_business_zcc
+ 	
+	 	<where>
+		 		<if test="sn !=null">
+		 			and sn=#{sn}
+		 		</if>
+		 		<if test="startTime != null">
+		 			<![CDATA[
+		 			and business_time>=#{startTime}
+		 			]]>
+		 		</if>
+		 		<if test="endTime != null">
+		 			<![CDATA[
+		 			and business_time<=#{endTime}
+		 			 ]]>
+		 		</if>
+		 		<if test="userId != null">
+		 			and user_id=#{userId}
+		 		</if>
+		 		<if test="remark3 != null">
+		 			and remark3=#{remark3}
+		 		</if>
+		 		<if test="status != null">
+		 			and status=#{status}
+		 		</if>
+		 </where>
+	
+ </select>
+ <select id="getBusinessDataListByT" resultType="com.group.wallet.model.vo.BusinessData">
+ 	
+	 	SELECT id,STATUS,remark,remark2,remark3,amt,sn,create_time AS createTime,user_id AS userId,business_time AS businessTime 
+	 	FROM wallet_business_zcc
+ 	
+	 	<where>
+		 		<if test="sn !=null">
+		 			and sn=#{sn}
+		 		</if>
+		 		<if test="startTime != null">
+		 			<![CDATA[
+		 			and business_time>=#{startTime}
+		 			]]>
+		 		</if>
+		 		<if test="endTime != null">
+		 			<![CDATA[
+		 			and business_time<=#{endTime}
+		 			 ]]>
+		 		</if>
+		 		<if test="userId != null">
+		 			and user_id in (SELECT id FROM wallet_user_info WHERE recommon_id=#{userId})
+		 		</if>
+		 </where>
+	
+ </select>
+ 
+ <!-- 获取 收益 列表 -->
+  <select id="getImcomeList" resultType="com.group.wallet.model.vo.Account">
+	 	 SELECT id,pos_type AS posType,user_id AS userId,user_name AS userName,user_telephone AS userTelephone,user_leave AS userLeave,amount,create_time AS createTime 
+		 FROM wallet_account_zcc 
+		 <where>
+	 		<if test="userId !=null">
+	 			and user_id = #{userId}
+	 		</if>
+	 		<if test="posType !=null">
+	 			and pos_type = #{posType}
+	 		</if>
+	 		<if test="app !=null">
+	 			and app = #{app}
+	 		</if>
+	 	</where>
+		 ORDER BY createTime DESC
+ </select>
+ <!-- 获取 收益 列表 -->
+ <select id="getImcomeList2" resultType="com.group.wallet.model.vo.Account">
+ 		 SELECT user_id AS userId,order_num as sn,channel_order_num as posType,amount,descp AS userName,create_time AS createTime 
+ 		 FROM wallet_income_records
+		 <where>
+	 		<if test="userId !=null">
+	 			<![CDATA[
+	 				and user_id = #{userId} and from_user_id <> #{userId}
+	 			]]>
+	 		</if>
+	 		<if test="posType !=null">
+	 			and channel_order_num = #{posType}
+	 		</if>
+	 		<if test="app !=null">
+	 			and type = #{app}
+	 		</if>
+	 	</where>
+		 ORDER BY createTime DESC
+ </select>
+ <select id="getImcomeList3" resultType="com.group.wallet.model.vo.Account">
+ 		 SELECT user_id AS userId,order_num as sn,channel_order_num as posType,amount,descp AS userName,create_time AS createTime 
+ 		 FROM wallet_income_records
+		 <where>
+	 		<if test="userId !=null">
+	 			and user_id = #{userId}
+	 		</if>
+	 		<if test="posType !=null">
+	 			and channel_order_num = #{posType}
+	 		</if>
+	 		<if test="app !=null">
+	 			and type = #{app}
+	 		</if>
+	 	</where>
+		 ORDER BY createTime DESC
+ </select>
+ <!-- 创建POS日志 -->
+ <insert id="addPosLog" useGeneratedKeys="true" keyProperty="id">
+ 	update wallet_pos_log set status='1',end_time=now() where sn=#{sn} and status='0';
+ 	
+ 	INSERT INTO wallet_pos_log 
+	(sn,user_id,type,status,start_time,create_time)
+	VALUES (#{sn},#{userId},
+	(SELECT TYPE FROM wallet_pos_zcc WHERE sn=#{sn}),
+	#{status},now(),now());
+ </insert> 
+<!-- 创建收益记录 -->
+  <insert id="addAccount" useGeneratedKeys="true" keyProperty="id">
+ 	INSERT INTO wallet_account_zcc 
+	(sn,app,pos_type,user_id,user_name,amount,create_time)
+	VALUES (#{sn},#{app},#{posType},#{userId},#{userName},#{amount},now());
+  </insert> 
+  <!-- 创建收益记录 -->
+  <insert id="addAccountList">
+  	<foreach collection="list" item="item" separator=";">
+ 		INSERT INTO wallet_account_zcc 
+		(sn,app,pos_type,user_id,user_name,amount,create_time)
+		VALUES (#{item.sn},#{item.app},#{item.posType},#{item.userId},#{item.userName},#{item.amount},now())
+	</foreach>
+  </insert> 
+  <!-- 创建收益记录 -->
+  <insert id="addIncome">
+ 		INSERT INTO wallet_income_records 
+		(user_id,order_num,channel_order_num,TYPE,amount,pristine_amount,surplus_amount,state,descp,create_time)
+		VALUES (#{userId},#{orderNum},(SELECT TYPE FROM wallet_pos_zcc WHERE sn=#{orderNum}),
+			#{type},#{amount},#{pristineAmount},#{surplusAmount},#{state},#{descp},now())
+  </insert> 
+  
+ <!-- 获取用户列表 （下级）-->
+ <select id="getUserInfoList" resultType="com.group.wallet.model.WalletUserInfo">
+	 	 SELECT id,recommon_id AS recommonId,phone,head_image as headImage,real_name as realName,user_type as userType 
+	 	 FROM wallet_user_info
+		 <where>
+	 		<if test="recommonId !=null">
+	 			and recommon_id = #{recommonId}
+	 		</if>
+	 		<if test="id !=null">
+	 			and id = #{id}
+	 		</if>
+	 		<if test="phone !=null">
+	 			and (phone like concat(concat('%',#{phone}),'%') or real_name like concat(concat('%',#{phone}),'%'))
+	 		</if>
+	 	</where>
+ </select>
+ 
+ <select id="getPosListByT" resultType="com.group.wallet.model.vo.Pos">
+	 	 SELECT id,user_id AS userId,active_user_id AS activeUserId,ACTION,TYPE,STATUS,logo,brand,sn,back_amt AS backAmt,
+ 			reach,limitnum,comp_amt as compAmt,amt,user_name as userName,
+ 			back_time AS backTime,active_time AS activeTime,update_time AS updateTime,create_time AS createTime 
+ 		 FROM wallet_pos_zcc
+ 		 <where>
+	 		<if test="activeUserId !=null">
+	 			and active_user_id IN (SELECT id FROM wallet_user_info WHERE recommon_id=#{activeUserId})
+	 		</if>
+	 		<if test="type != null">
+	 			and type=#{type}
+	 		</if>
+	 		<if test="brand != null">
+	 			and brand=#{brand}
+	 		</if>
+	 	</where>
+ </select>
+ 
+ <select id="getPosLogList" resultType="com.group.wallet.model.vo.PosLog">
+	 	 SELECT user_id AS userId,TYPE,STATUS,sn,start_time AS startTime,end_time AS endTime 
+	 	 FROM wallet_pos_log
+ 		 <where>
+	 		<if test="userId !=null">
+	 			and user_id =#{userId}
+	 		</if>
+	 		<if test="status != null">
+	 			and status=#{status}
+	 		</if>
+	 		<if test="sn != null">
+	 			and sn=#{sn}
+	 		</if>
+	 	</where>
+ </select>
+ 
+  <select id="getChannelList" resultType="com.group.wallet.model.vo.ChannelVO">
+	 	 SELECT id,number,NAME FROM wallet_channel WHERE number='ZZLM'
+ </select>
+ <!-- 更新POS类型到 收益表 -->
+ <update id="updateIncomeByPosType">
+ 	UPDATE wallet_income_records SET channel_order_num=(SELECT TYPE FROM wallet_pos_zcc WHERE sn=order_num)
+	WHERE channel_order_num IS NULL
+ </update>
+</mapper>

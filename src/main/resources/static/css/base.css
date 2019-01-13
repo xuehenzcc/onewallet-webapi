@@ -1,0 +1,115 @@
+body {
+    background: #F4F4F6;
+}
+
+.paylo {
+    background: #fff;
+}
+
+.duolor {
+    height: 3.066667rem;
+    text-align: center;
+    line-height: 3.066667rem;;
+    font-size: 1.6rem;
+    color: #EC8576;
+    background: #E9E9E9;
+    position: relative;
+    margin: 0;
+    border: 0;
+}
+
+.weli2 {
+    border: 0;
+    height: 3.093333rem;
+    background: #fff;
+    padding-top: 2px;
+
+    display: flex;
+    margin-bottom: 10px;
+
+}
+
+.weli2:before {
+    border-top: 0;
+}
+
+.nav_rig .nav_cen .nav_rig_txt {
+    color: #3C3C3C;
+    font-size: 18px;
+    margin-top: 8px;
+}
+
+.nav_rig .nav_cen .nav_last {
+    color: #959595;
+    font-size: 13px;
+
+}
+
+.mesg {
+    position: relative;
+
+}
+
+.cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 199;
+}
+
+.weui-cell:before {
+    left: 0;
+}
+
+.mesgtxt {
+    text-align: center;
+    font-size: 16px;
+}
+
+.sux {
+    color: #EA685B;
+
+}
+
+.weui-label {
+    letter-spacing: 0.293333rem;
+
+}
+
+.weui-toast {
+    top: 275px;
+}
+
+.navmig {
+    margin-right: 0.266667rem;
+    margin-top: 0.266667rem;
+}
+
+.weui-label {
+    display: block;
+    width: 87px;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.confirm_btn {
+
+}
+
+#btn {
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 6px;
+    padding-right: 6px;
+    box-sizing: border-box;
+    width: 25%;
+    top: 14%;
+    right: 17px;
+    height: 2.0rem;
+    line-height: 1.8em;
+    font-size: 12px;
+}

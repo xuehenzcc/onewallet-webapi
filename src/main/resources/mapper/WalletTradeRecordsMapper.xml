@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.group.wallet.mapper.WalletTradeRecordsMapper" >
+
+    <!--查询交易记录-->
+    <select id="selectByOrderNo" resultType="com.group.wallet.model.WalletTradeRecords">
+      select id, trade_state tradeState from wallet_trade_records where order_no = #{orderNo} for update
+    </select>
+
+    <!--查询当日交易总金额-->
+    <select id="selectTodayTotalAmount" resultType="java.math.BigDecimal">
+      select SUM(real_trade_money) from wallet_trade_records
+      where user_id = #{userId} and channel_id = #{channelId} and trade_state = #{tradeState}
+      and trade_time like CONCAT(DATE_FORMAT(curdate(),'%Y-%m-%d'),'%')
+    </select>
+
+
+    <!--查询临时表数据-->
+    <select id="selectTemporaryData" resultType="java.util.HashMap">
+        select DISTINCT t1.agent_number, t1.customer_number, t1.name, t2.user_id
+        from temporary_table t1 left join wallet_channel_mer t2 on t1.customer_number = t2.channel_mer_no
+        left join wallet_user_info t3 on t2.user_id = t3.id
+    </select>
+
+    <!--删除临时表数据-->
+    <delete id="deleteTemporaryData">
+        delete from temporary_table where customer_number = #{customerNumber}
+    </delete>
+
+</mapper>

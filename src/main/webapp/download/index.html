@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html" charset="utf-8" http-equiv="content-type"/>
+  <meta charset="{CHARSET}">
+  <meta name="author" content="Haolin,haolinhom@gmail.com"/>
+  <title>下载 - 至尊钱包</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <!--other-->
+  <meta name="description" content="">
+  <meta name="keywords" content="至尊钱包">
+  <meta name="renderer" content="webkit">
+  <!--IOS-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="至尊钱包">
+  <!--<meta name="apple-mobile-web-app-status-bar-style" content="white">-->
+  <!--<link rel="apple-touch-icon-precomposed" href="static/img/touch/icon-196x196.png">-->
+  <!--Android-->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#006cb8">
+  <!--<link rel="icon" sizes="196x196" href="static/img/touch/icon-196x196.png">-->
+  <!-- Wechat meta -->
+  <meta property="weixin:timeline_title" content="至尊钱包">
+  <meta property="weixin:chat_title" content="至尊钱包">
+  <meta property="weixin:description" content="">
+  <!--<meta property="weixin:image" content="static/img/touch/icon-180x180.png">-->
+  <!--static-->
+  <link rel="alternate icon" type="image/png" href="../static/img/favicon.png">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.2/style/weui.min.css">
+  <link rel="stylesheet" href="../static/css/jquery-weui.min.css">
+  <script src="../static/js/flexible.js"></script>
+  <link rel="stylesheet" href="../static/css/normalize.css">
+  <!--<link rel="stylesheet/less" type="text/css" href="../static/css/style.less">-->
+  <!--<script src="../static/js/less.min.js"></script>-->
+  <link rel="stylesheet" href="../static/css/style.css">
+  <script src="../static/js/haolin.js"></script>
+  <script src="../static/js/project.js"></script>
+  <script src="../static/js/md5.js"></script>
+  <!--<script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>-->
+</head>
+<body>
+<div id="app-download">
+  <main id="a-d-main">
+    <img class="a-d-main-bg" src="../static/img/bg.jpg" alt="">
+    <div class="a-d-main-wrapper">
+      <div class="a-d-main-header">
+        <img class="a-d-logo" src="../static/img/logo.jpg" alt="">
+        <p class="a-d-logo-text">至尊钱包</p>
+      </div>
+      <div class="a-d-main-footer">
+        <h4>已有<span class="a-d-main-footer-big">200万</span>用户加入</h4>
+        <p>互联网支付+移动金融 的创业平台</p>
+        <p>简单分享创造持续高收入</p>
+      </div>
+    </div>
+  </main>
+  <footer id="a-d-footer">
+    <div class="a-p-footer-wrapper">
+      <div class="a-p-footer-btn">
+        <a href="https://fir.im/pqhe" class="a-p-footer-link">
+          <img class="a-p-footer-img" src="../static/img/ios.png" alt="">
+        </a>
+      </div>
+      <div class="a-p-footer-btn">
+        <a href="http://fir.im/g3ry" class="a-p-footer-link">
+          <img class="a-p-footer-img" src="../static/img/android.png" alt="">
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>
+</body>
+<script>
+  var vw = getViewport().width;
+  var vh = getViewport().height;
+  var mainH = (742*vw/640).toFixed(0);
+  var footerH = vh - mainH;
+  $qs("#a-d-main").$setCSSText("height:"+mainH+"px;");
+  $qs("#a-d-footer").$setCSSText("height:"+footerH+"px;");
+</script>
+</html>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.group.wallet.mapper.WalletUserInfoMapper" >
+
+    <!--获取用户信息（加悲观锁）-->
+    <select id="selectUserInfoForUpdate" resultType="com.group.wallet.model.WalletUserInfo">
+        select id, state, profit_balance profitBalance, real_name realName, phone, settle_card_no settleCardNo
+        from wallet_user_info where id = #{userId} for update
+    </select>
+
+    <!--查询推荐的已认证的用户的数量-->
+    <select id="selectRecommenCount" resultType="int">
+        select count(*) from wallet_user_info where state = #{userState} and recommon_id = #{recommonId}
+    </select>
+
+    <!--查询直接推荐的数量-->
+    <select id="selectDirectRecommonCount" resultType="int">
+      select count(*) from wallet_user_info where recommon_id = #{userId} and instr(#{userType}, user_type) > 0
+    </select>
+
+    <!--查询间接推荐的数量-->
+    <select id="selectIndirectRecommonCount" resultType="int">
+      select count(*) from wallet_user_info where number like CONCAT(#{userNumber},'%') and recommon_id != #{userId} and instr(#{userType}, user_type) > 0
+    </select>
+
+</mapper>

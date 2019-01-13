@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.group.wallet.mapper.WalletIncomeRecordsMapper" >
+
+    <!--查询总共累计收入-->
+    <select id="selectTotalIncome" resultType="java.math.BigDecimal">
+      select SUM(amount) from wallet_income_records where user_id = #{userId} and type like 'A%'
+    </select>
+
+    <!--查询今日累计收入-->
+    <select id="selectTodayIncome" resultType="java.math.BigDecimal">
+        select SUM(amount) from wallet_income_records where user_id = #{userId} and type like 'A%' and create_time like CONCAT(DATE_FORMAT(curdate(),'%Y-%m-%d'),'%')
+    </select>
+
+    <!--查询昨日累计收入-->
+    <select id="selectYestodayIncome" resultType="java.math.BigDecimal">
+        select SUM(amount) from wallet_income_records where user_id = #{userId} and type like 'A%' and create_time like CONCAT(DATE_FORMAT(DATE_SUB(curdate(),INTERVAL 1 DAY),'%Y-%m-%d'),'%')
+    </select>
+
+    <!--获取最近7天收益明细-->
+    <select id="getSevenDayIncome" resultType="java.util.Map">
+        <![CDATA[
+            select sum(amount) amount,date from
+            (select amount,DATE_FORMAT(create_time,'%Y-%m-%d') date from wallet_income_records where user_id = #{userId} and type like 'A%'
+            and create_time >= DATE_FORMAT(DATE_SUB(now(),INTERVAL 7 DAY),'%Y-%m-%d') AND create_time < now()) t1
+            group by date
+            order by date desc
+        ]]>
+    </select>
+
+    <!--获取时间区间内的收益明细-->
+    <select id="getTimeIncome" resultType="java.util.Map">
+        select sum(amount) amount,date from
+        (select amount,DATE_FORMAT(create_time,'%Y-%m-%d') date from wallet_income_records where user_id = #{userId} and type like 'A%'
+        <if test="startDate != null and startDate != ''">
+            and create_time >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[
+              AND create_time < #{endDate}
+            ]]>
+        </if>
+        ) t1
+        group by date desc
+        order by date
+    </select>
+
+    <!--获取预支收益-->
+    <select id="getAdvanceProfit" resultType="java.math.BigDecimal">
+        <![CDATA[
+          select sum(amount) amount from wallet_income_records where user_id = #{userId} and type like 'A%'
+          and create_time >= DATE_FORMAT(DATE_SUB(now(),INTERVAL 90 DAY),'%Y-%m-%d') AND create_time < now()
+        ]]>
+    </select>
+
+</mapper>
