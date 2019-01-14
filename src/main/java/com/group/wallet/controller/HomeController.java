@@ -599,24 +599,61 @@ public class HomeController extends BaseController {
         posVO.setType(type);
         posVO.setBrand(brand);
         posVO.setSn(sn);
-        posVO.setAction(action);
-        if("1".equals(action)){
-            posVO.setUserId(Long.valueOf(userId));
+        if("1".equals(action) || "2".equals(action)){
+        	if(null!=userId && !"".equals(userId)){
+	        	posVO.setUserId(Long.valueOf(userId));
+	        }
         }else{
-            posVO.setActiveUserId(Long.valueOf(userId));
+        	if(null!=userId && !"".equals(userId)){
+        		posVO.setActiveUserId(Long.valueOf(userId));
+        	}
         }
-        if(null==action){
-        	posVO.setAction("0");
-        }
-        try {
-            List<Pos> result = homeService.getPosList(posVO);
-            if("t".equals(who)){//团队
+        
+        List<Pos> list= new ArrayList<Pos>();
+        List<Pos> result = homeService.getPosList(posVO);
+        if("1".equals(action)){//召回机具
+//            posVO.setUserId(Long.valueOf(userId));
+        	for (Pos pos:result) {
+        		if(pos.getUserId().intValue()!=pos.getActiveUserId().intValue()){//父级
+            		if("1".equals(pos.getAction())){
+            			list.add(pos);
+            		}
+            	}
+			}
+        }else if("2".equals(action)){//被召回机具
+//            posVO.setActiveUserId(Long.valueOf(userId));
+        	for (Pos pos:result) {
+        		if(pos.getUserId().intValue()!=pos.getActiveUserId().intValue()){//父级
+            		if("2".equals(pos.getAction())){
+            			list.add(pos);
+            		}
+            	}
+			}
+        }else if("0".equals(action)){//我的机具
+//        	posVO.setAction("0");
+        	for (Pos pos:result) {
+        		if(pos.getUserId().intValue()==pos.getActiveUserId().intValue()){//父级
+            		if("0".equals(pos.getAction()) || "3".equals(pos.getAction())){
+            			list.add(pos);
+            		}
+            	}else{
+            		if("1".equals(pos.getAction())){
+            			list.add(pos);
+            		}
+            	}
+			}
+        	if("t".equals(who)){//团队
             	List<Pos> result_t = homeService.getPosListByT(posVO);
             	if(result_t.size()>0){
-            		result.addAll(result_t);
+            		list.addAll(result_t);
             	}
             }
-            renderJson(request, response, SysCode.SUCCESS, result);//统计POS
+        }else{
+        	list.addAll(result);
+        }
+        try {
+//            List<Pos> result = homeService.getPosList(posVO);
+            renderJson(request, response, SysCode.SUCCESS, list);//统计POS
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("`````method``````getPosList()`````"+e.getMessage());
