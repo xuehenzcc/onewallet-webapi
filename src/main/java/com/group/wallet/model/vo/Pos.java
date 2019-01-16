@@ -42,7 +42,31 @@ public class Pos {
 	  private Integer count;//总计数量
 	  private Integer activeNum;//激活数量
 	  
+	  private String lookNum;//看板（1我的机具2召回机具3被召回机具）
+	  private String activeDown;//下发（0不显示1显示）
+	  private String activeBack;//召回（0不显示1显示）
 	  
+	
+	  
+	  
+	public String getLookNum() {
+		return lookNum;
+	}
+	public void setLookNum(String lookNum) {
+		this.lookNum = lookNum;
+	}
+	public String getActiveDown() {
+		return activeDown;
+	}
+	public void setActiveDown(String activeDown) {
+		this.activeDown = activeDown;
+	}
+	public String getActiveBack() {
+		return activeBack;
+	}
+	public void setActiveBack(String activeBack) {
+		this.activeBack = activeBack;
+	}
 	public Integer getCount() {
 		return count;
 	}
