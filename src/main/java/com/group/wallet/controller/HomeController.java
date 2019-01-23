@@ -583,77 +583,95 @@ public class HomeController extends BaseController {
     @RequestMapping("/getPosList")
     public void getPosList(HttpServletRequest request,HttpServletResponse response){
 
-        String[] paramKey = {"userId","type","who","brand","sn","action"};
+        String[] paramKey = {"userId","type","who","brand","sn"};
         Map<String, String> params = parseParams(request, "getPosList", paramKey);
         String userId = params.get("userId");
         String type = params.get("type"); //1大pos,2智能pos,3小pos
         String who = params.get("who"); //z-直营，t-团队
         String brand = params.get("brand"); //品牌
         String sn = params.get("sn"); //sn
-        String action = params.get("action"); //1下发，2召回
-//		if(StringUtils.isBlank(userId) || StringUtils.isBlank(type) || StringUtils.isBlank(who)|| StringUtils.isBlank(brand)){//id不能为空
-//        	renderJson(request, response, SysCode.PARAM_IS_ERROR, null);
-//        	return;
-//        }
+		if(StringUtils.isBlank(userId) || StringUtils.isBlank(type) || StringUtils.isBlank(who)|| StringUtils.isBlank(brand)){//id不能为空
+        	renderJson(request, response, SysCode.PARAM_IS_ERROR, null);
+        	return;
+        }
         Pos posVO=new Pos();
         posVO.setType(type);
         posVO.setBrand(brand);
         posVO.setSn(sn);
-        if("1".equals(action) || "2".equals(action)){
-        	if(null!=userId && !"".equals(userId)){
-	        	posVO.setUserId(Long.valueOf(userId));
-	        }
-        }else{
-        	if(null!=userId && !"".equals(userId)){
-        		posVO.setActiveUserId(Long.valueOf(userId));
-        	}
-        }
+        posVO.setActiveUserId(Long.valueOf(userId));
         
         List<Pos> list= new ArrayList<Pos>();
         List<Pos> result = homeService.getPosList(posVO);
-        if("1".equals(action)){//召回机具
-//            posVO.setUserId(Long.valueOf(userId));
-        	for (Pos pos:result) {
-        		if(pos.getUserId().intValue()!=pos.getActiveUserId().intValue()){//父级
-            		if("1".equals(pos.getAction())){
-            			list.add(pos);
-            		}
-            	}
-			}
-        }else if("2".equals(action)){//被召回机具
-//            posVO.setActiveUserId(Long.valueOf(userId));
-        	for (Pos pos:result) {
-        		if(pos.getUserId().intValue()!=pos.getActiveUserId().intValue()){//父级
-            		if("2".equals(pos.getAction())){
-            			list.add(pos);
-            		}
-            	}
-			}
-        }else if("0".equals(action)){//我的机具
-//        	posVO.setAction("0");
-        	for (Pos pos:result) {
-        		if(pos.getUserId().intValue()==pos.getActiveUserId().intValue()){//父级
-            		if("0".equals(pos.getAction()) || "3".equals(pos.getAction())){
-            			list.add(pos);
-            		}
-            	}else{
-            		if("1".equals(pos.getAction())){
-            			list.add(pos);
-            		}
-            	}
-			}
-        	if("t".equals(who)){//团队
-            	List<Pos> result_t = homeService.getPosListByT(posVO);
-            	if(result_t.size()>0){
-            		list.addAll(result_t);
-            	}
-            }
-        }else{
-        	list.addAll(result);
+    	for (Pos pos:result) {
+    		if(pos.getUserId().intValue()==pos.getActiveUserId().intValue()){//父级
+        		if("0".equals(pos.getAction()) || "3".equals(pos.getAction())){
+        			pos.setActiveDown("1");//我的机具
+        		}
+        	}else{
+//        		if("1".equals(pos.getAction())){
+        			pos.setActiveDown("0");//上级下发POS,不可以再下发，下发按钮不可用。
+//        		}
+        	}
+    		list.add(pos);
+		}
+    	if("t".equals(who)){//团队
+        	List<Pos> result_t = homeService.getPosListByT(posVO);
+        	if(result_t.size()>0){
+        		list.addAll(result_t);
+        	}
         }
         try {
-//            List<Pos> result = homeService.getPosList(posVO);
             renderJson(request, response, SysCode.SUCCESS, list);//统计POS
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("`````method``````getPosList()`````"+e.getMessage());
+            renderJson(request, response, SysCode.SYS_ERR, e.getMessage());
+        }
+    }
+    //获取POS列表(召回)
+    @RequestMapping("/getPosListByBack")
+    public void getPosListByBack(HttpServletRequest request,HttpServletResponse response){
+
+        String[] paramKey = {"userId","sn"};
+        Map<String, String> params = parseParams(request, "getPosListByBack", paramKey);
+        String userId = params.get("userId");
+        String sn = params.get("sn"); //sn
+		if(StringUtils.isBlank(userId)){//id不能为空
+        	renderJson(request, response, SysCode.PARAM_IS_ERROR, null);
+        	return;
+        }
+        Pos posVO=new Pos();
+        posVO.setSn(sn);
+        posVO.setUserId(Long.valueOf(userId));
+        posVO.setAction("1");//下发状态（显示在召回列表）
+        
+        try {
+            List<Pos> result = homeService.getPosList(posVO);
+            renderJson(request, response, SysCode.SUCCESS, result);//统计POS
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("`````method``````getPosList()`````"+e.getMessage());
+            renderJson(request, response, SysCode.SYS_ERR, e.getMessage());
+        }
+    }
+  //获取POS列表(被召回)
+    @RequestMapping("/getPosListByBacked")
+    public void getPosListByBacked(HttpServletRequest request,HttpServletResponse response){
+
+        String[] paramKey = {"userId"};
+        Map<String, String> params = parseParams(request, "getPosListByBacked", paramKey);
+        String userId = params.get("userId");
+		if(StringUtils.isBlank(userId)){//id不能为空
+        	renderJson(request, response, SysCode.PARAM_IS_ERROR, null);
+        	return;
+        }
+        Pos posVO=new Pos();
+        posVO.setActiveUserId(Long.valueOf(userId));//
+        posVO.setAction("2");//召回状态（显示在被召回列表）
+        
+        try {
+            List<Pos> result = homeService.getPosList(posVO);
+            renderJson(request, response, SysCode.SUCCESS, result);//统计POS
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("`````method``````getPosList()`````"+e.getMessage());
