@@ -315,9 +315,15 @@ public class HomeService {
 //		record.setRate(BigDecimal.valueOf(0.6));
 		record.setSettleType("T0");
 		record.setOrderNo(business.getSn());//sn
-		List<ChannelVO> channels=homeMapper.getChannelList(null);
-		if(channels.size()>0){
-			record.setChannelId(channels.get(0).getId());//ZZLM
+		
+		String payID=business.getRemark();
+		if("".equals(payID) || null==payID){
+			List<ChannelVO> channels=homeMapper.getChannelList(null);
+			if(channels.size()>0){
+				record.setChannelId(channels.get(0).getId());//ZZLM
+			}
+		}else{
+			record.setChannelId(Long.valueOf(payID));//ZZLM
 		}
 		settleService.calculateTradeProfit(record);
 	}
