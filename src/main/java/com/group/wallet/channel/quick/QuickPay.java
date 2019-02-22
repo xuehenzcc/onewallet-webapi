@@ -1,12 +1,13 @@
 package com.group.wallet.channel.quick;
 
-import com.group.wallet.channel.ChannelPay;
-import com.group.wallet.model.*;
-//import com.sun.tools.corba.se.idl.StringGen;
-
-import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 import java.util.Map;
+
+import com.group.wallet.channel.ChannelPay;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
+//import com.sun.tools.corba.se.idl.StringGen;
+import com.group.wallet.model.zzlm.ZzlmChannel;
 
 /**
  * 快捷支付
@@ -19,7 +20,7 @@ public interface QuickPay extends ChannelPay{
      * @param tradeRecords
      * @param bankCard
      */
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception;
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception;
 
     /**
      * 快捷支付确认
@@ -30,7 +31,7 @@ public interface QuickPay extends ChannelPay{
      * @param params
      * @throws Exception
      */
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception;
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception;
 
     /**
      * 结算
@@ -38,7 +39,7 @@ public interface QuickPay extends ChannelPay{
      * @param params
      * @throws Exception
      */
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception;
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception;
 
     /**
      * 付款成功通知

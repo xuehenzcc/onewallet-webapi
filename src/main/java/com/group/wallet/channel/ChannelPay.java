@@ -1,6 +1,8 @@
 package com.group.wallet.channel;
 
 import com.group.wallet.model.*;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 
 import java.util.Map;
 
@@ -18,7 +20,7 @@ public interface ChannelPay  {
      * @return
      * @throws Exception
      */
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception;
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception;
 
     /**
      * 更新子商户
@@ -29,7 +31,7 @@ public interface ChannelPay  {
      * @return
      * @throws Exception
      */
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception;
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception;
 
     /**
      * 下单&返回H5
@@ -41,7 +43,7 @@ public interface ChannelPay  {
      * @return
      * @throws Exception
      */
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception;
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception;
 
     /**
      * 校验签名
@@ -50,5 +52,5 @@ public interface ChannelPay  {
      * @return
      * @throws Exception
      */
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception;
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception;
 }

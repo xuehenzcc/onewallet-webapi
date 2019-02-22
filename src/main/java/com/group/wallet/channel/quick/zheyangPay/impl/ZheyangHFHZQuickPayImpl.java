@@ -10,6 +10,8 @@ import com.group.wallet.channel.quick.QuickPay;
 import com.group.wallet.mapper.WalletTradeRecordsMapper;
 import com.group.wallet.model.*;
 import com.group.wallet.model.enums.TradeState;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 import com.group.wallet.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,17 +31,17 @@ public class ZheyangHFHZQuickPayImpl implements QuickPay {
     private WalletTradeRecordsMapper walletTradeRecordsMapper;
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         String projectUrl = commonService.getProjectUrl();
 
         JSONObject content = new JSONObject();
@@ -115,22 +117,22 @@ public class ZheyangHFHZQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
         return null;
     }
 
     @Override
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception {
 
     }
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception{
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception{
         String bizOrderNumber = (String) params.get("bizOrderNumber");
         String completedTime = (String) params.get("completedTime");
         String mid = (String) params.get("mid");

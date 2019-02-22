@@ -5,14 +5,21 @@
  */
 package com.group.wallet.mapper;
 
-import com.group.wallet.model.WalletChannel;
-import com.group.wallet.model.WalletIncomeRecords;
-import com.group.wallet.model.WalletUserInfo;
-import com.group.wallet.model.vo.*;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.vo.Account;
+import com.group.wallet.model.vo.Adress;
+import com.group.wallet.model.vo.BusinessData;
+import com.group.wallet.model.vo.ChannelVO;
+import com.group.wallet.model.vo.ParamVO;
+import com.group.wallet.model.vo.Pos;
+import com.group.wallet.model.vo.PosLog;
+import com.group.wallet.model.vo.Shop;
+import com.group.wallet.model.vo.ShopOrder;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
 
 /**
  * @author c0z00k8
@@ -28,6 +35,8 @@ public interface HomeMapper {
 	public int updateAddressByMode(Adress address);//设置默认地址
 	public int updateAddressByUser(Adress address);//设置默认地址
 	public List<Adress> getAddress(Adress address);//获取地址
+	//获取配置参数
+	public List<ParamVO> getParam(ParamVO address);//获取地址
 	
 	//获取shop
 	public List<Shop> getShopList(Shop pos);
@@ -52,7 +61,7 @@ public interface HomeMapper {
 	//添加分润
 	public int addAccount(Account account);
 	public int addAccountList(List<Account> account);
-	public int addIncome(WalletIncomeRecords inCome);
+	public int addIncome(ZzlmIncomeRecords inCome);
 	public int updatePosList(List<Pos> posList);
 	
 	//获取用户信息

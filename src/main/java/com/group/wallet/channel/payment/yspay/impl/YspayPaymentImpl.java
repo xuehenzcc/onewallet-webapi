@@ -1,26 +1,5 @@
 package com.group.wallet.channel.payment.yspay.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.group.core.exception.ServiceException;
-import com.group.utils.HttpClientUtils;
-import com.group.wallet.channel.payment.PaymentPay;
-import com.group.wallet.channel.payment.yspay.bean.YsPayOrderBean;
-import com.group.wallet.channel.payment.yspay.config.YspayConfig;
-import com.group.wallet.channel.payment.yspay.utils.SignUtils;
-import com.group.wallet.mapper.CommonMessagesMapper;
-import com.group.wallet.mapper.SysConfigMapper;
-import com.group.wallet.model.CommonMessages;
-import com.group.wallet.model.SysConfig;
-import com.group.wallet.model.WalletChannel;
-import com.qiniu.util.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,13 +10,29 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.group.core.exception.ServiceException;
+import com.group.utils.HttpClientUtils;
+import com.group.wallet.channel.payment.PaymentPay;
+import com.group.wallet.channel.payment.yspay.bean.YsPayOrderBean;
+import com.group.wallet.channel.payment.yspay.config.YspayConfig;
+import com.group.wallet.channel.payment.yspay.utils.SignUtils;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+
 @Service
 public class YspayPaymentImpl implements PaymentPay {
 
     protected static Logger logger = LoggerFactory.getLogger(YspayPaymentImpl.class);
 
     @Override
-    public void t0pay(HttpServletRequest request, WalletChannel channel, Map<String, Object> bizContent) throws Exception {
+    public void t0pay(HttpServletRequest request, ZzlmChannel channel, Map<String, Object> bizContent) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         YsPayOrderBean bean = new YsPayOrderBean();

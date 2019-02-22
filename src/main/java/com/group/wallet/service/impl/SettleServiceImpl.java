@@ -1,26 +1,47 @@
 package com.group.wallet.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.group.core.service.impl.PushService;
-import com.group.wallet.mapper.*;
-import com.group.wallet.model.*;
-import com.group.wallet.model.enums.*;
-import com.group.wallet.service.SettleService;
-import com.group.wallet.service.WalletService;
-import com.group.wallet.util.StringReplaceUtil;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.group.core.service.impl.PushService;
+import com.group.wallet.mapper.CommonMessagesMapper;
+import com.group.wallet.mapper.WalletChannelMapper;
+import com.group.wallet.mapper.WalletDeductRateMapper;
+import com.group.wallet.mapper.WalletIncomeRecordsMapper;
+import com.group.wallet.mapper.WalletUserInfoMapper;
+import com.group.wallet.model.CommonMessages;
+import com.group.wallet.model.WalletDeductRate;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUpgradeOrder;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.enums.ChannelType;
+import com.group.wallet.model.enums.DeductType;
+import com.group.wallet.model.enums.IncomeRecordsState;
+import com.group.wallet.model.enums.IncomeType;
+import com.group.wallet.model.enums.MessageType;
+import com.group.wallet.model.enums.UserState;
+import com.group.wallet.model.enums.UserType;
+import com.group.wallet.model.zzlm.ZzlmAdvance;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
+import com.group.wallet.service.SettleService;
+import com.group.wallet.service.WalletService;
+import com.group.wallet.util.StringReplaceUtil;
 
 @Service
 public class SettleServiceImpl implements SettleService {
@@ -65,7 +86,7 @@ public class SettleServiceImpl implements SettleService {
         if(rate==null || rate.compareTo(BigDecimal.ZERO)<=0)
             return;
 
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
         String channelType = channel.getChannelType();
         IncomeType incomeType = null;
         if(ChannelType.刷卡渠道.getValue().equals(channelType)){
@@ -265,9 +286,9 @@ public class SettleServiceImpl implements SettleService {
             return;
 
         //获取最近一笔未还清的预支
-        WalletAdvance advance = walletService.getNewestAdvance(userInfo.getId());
+        ZzlmAdvance advance = walletService.getNewestAdvance(userInfo.getId());
 
-        BigDecimal profitBalance = userInfo.getProfitBalance()==null?BigDecimal.ZERO:userInfo.getProfitBalance();//用户剩余分润金额
+        BigDecimal profitBalance = userInfo.getProfitBalance2()==null?BigDecimal.ZERO:userInfo.getProfitBalance2();//用户剩余分润金额
         BigDecimal profitBalance2 = null;
         if(advance != null){
             //有未还的预支金额，分润余额不更新
@@ -278,12 +299,12 @@ public class SettleServiceImpl implements SettleService {
             //更新分润余额
             WalletUserInfo userInfo1 = new WalletUserInfo();
             userInfo1.setId(userInfo.getId());
-            userInfo1.setProfitBalance(profitBalance2);
+            userInfo1.setProfitBalance2(profitBalance2);//至尊联盟分润余额
             walletUserInfoMapper.updateByPrimaryKeySelective(userInfo1);
         }
 
         //添加分润记录
-        WalletIncomeRecords incomeRecords = new WalletIncomeRecords();
+        ZzlmIncomeRecords incomeRecords = new ZzlmIncomeRecords();
         incomeRecords.setUserId(userInfo.getId());
         incomeRecords.setFromUserId(sourceUser.getId());
         incomeRecords.setOrderNum(orderNum);

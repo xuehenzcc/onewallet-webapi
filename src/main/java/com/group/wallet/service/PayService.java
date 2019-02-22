@@ -1,13 +1,10 @@
 package com.group.wallet.service;
 
-import com.group.wallet.model.WalletChannel;
-import com.group.wallet.model.WalletDeductRate;
-import com.group.wallet.model.WalletTradeRecords;
-
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 支付

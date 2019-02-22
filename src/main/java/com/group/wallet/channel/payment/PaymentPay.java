@@ -1,9 +1,10 @@
 package com.group.wallet.channel.payment;
 
-import com.group.wallet.model.WalletChannel;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
+
+import com.group.wallet.model.zzlm.ZzlmChannel;
 
 /**
  * 代付
@@ -16,5 +17,5 @@ public interface PaymentPay {
      * @param channel
      * @throws Exception
      */
-    public void t0pay(HttpServletRequest request, WalletChannel channel, Map<String, Object> params) throws Exception;
+    public void t0pay(HttpServletRequest request, ZzlmChannel channel, Map<String, Object> params) throws Exception;
 }

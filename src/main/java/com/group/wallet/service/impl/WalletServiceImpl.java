@@ -1,21 +1,14 @@
 package com.group.wallet.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
-import com.group.core.exception.ServiceException;
-import com.group.core.service.ImageService;
-import com.group.utils.ImageUtils;
-import com.group.utils.OrderUtils;
-import com.group.wallet.channel.payment.PaymentFactory;
-import com.group.wallet.channel.payment.PaymentPay;
-import com.group.wallet.channel.pos.lkl.impl.LklPosPayImpl;
-import com.group.wallet.mapper.*;
-import com.group.wallet.model.*;
-import com.group.wallet.model.enums.*;
-import com.group.wallet.service.PayService;
-import com.group.wallet.service.SettleService;
-import com.group.wallet.service.WalletService;
-import com.group.wallet.util.StringReplaceUtil;
-import com.sun.rowset.internal.Row;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
@@ -24,11 +17,47 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.util.*;
+import com.alibaba.fastjson.JSONObject;
+import com.group.core.exception.ServiceException;
+import com.group.utils.OrderUtils;
+import com.group.wallet.channel.pos.lkl.impl.LklPosPayImpl;
+import com.group.wallet.mapper.CommonAdvertisingMapper;
+import com.group.wallet.mapper.WalletAdvanceBillMapper;
+import com.group.wallet.mapper.WalletAdvanceMapper;
+import com.group.wallet.mapper.WalletChannelMapper;
+import com.group.wallet.mapper.WalletIncomeRecordsMapper;
+import com.group.wallet.mapper.WalletModuleMapper;
+import com.group.wallet.mapper.WalletReceiveOrderMapper;
+import com.group.wallet.mapper.WalletRefundOrderMapper;
+import com.group.wallet.mapper.WalletTradeRecordsMapper;
+import com.group.wallet.mapper.WalletUpgradeOrderMapper;
+import com.group.wallet.mapper.WalletUserInfoMapper;
+import com.group.wallet.model.CommonAdvertising;
+import com.group.wallet.model.WalletModule;
+import com.group.wallet.model.WalletReceiveOrder;
+import com.group.wallet.model.WalletRefundOrder;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUpgradeOrder;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.enums.AdvanceState;
+import com.group.wallet.model.enums.IncomeRecordsState;
+import com.group.wallet.model.enums.IncomeType;
+import com.group.wallet.model.enums.OrderType;
+import com.group.wallet.model.enums.PaymentType;
+import com.group.wallet.model.enums.RefundOrderState;
+import com.group.wallet.model.enums.TradeState;
+import com.group.wallet.model.enums.UpgradeType;
+import com.group.wallet.model.enums.UserState;
+import com.group.wallet.model.enums.UserType;
+import com.group.wallet.model.zzlm.ZzlmAdvance;
+import com.group.wallet.model.zzlm.ZzlmAdvanceBill;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
+import com.group.wallet.service.PayService;
+import com.group.wallet.service.WalletService;
+
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class WalletServiceImpl implements WalletService {
@@ -94,7 +123,7 @@ public class WalletServiceImpl implements WalletService {
 
         //当前可提现余额
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
-        BigDecimal profitBalance = userInfo.getProfitBalance();//分润余额
+        BigDecimal profitBalance = userInfo.getProfitBalance2();//分润余额
 
         //共累计收益
         BigDecimal totalIncome = walletIncomeRecordsMapper.selectTotalIncome(userId);
@@ -137,12 +166,12 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public List<WalletIncomeRecords> allIncomeRecords(Long userId, String type, Integer pageNo) {
+    public List<ZzlmIncomeRecords> allIncomeRecords(Long userId, String type, Integer pageNo) {
         int start = (pageNo-1)*20;
         int limit = 20;
         RowBounds rowBounds = new RowBounds(start,limit);
 
-        Example example = new Example(WalletIncomeRecords.class);
+        Example example = new Example(ZzlmIncomeRecords.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("userId", userId);
         if("A0".equals(type)){
@@ -161,7 +190,7 @@ public class WalletServiceImpl implements WalletService {
         }
         example.setOrderByClause("id desc");
 
-        List<WalletIncomeRecords> list = walletIncomeRecordsMapper.selectByExampleAndRowBounds(example,rowBounds);
+        List<ZzlmIncomeRecords> list = walletIncomeRecordsMapper.selectByExampleAndRowBounds(example,rowBounds);
         return list;
     }
 
@@ -188,7 +217,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public void checkTakeOut(Long userId) {
-        WalletAdvance advance1 = getNewestAdvance(userId);
+        ZzlmAdvance advance1 = getNewestAdvance(userId);
         if(advance1!=null){
             throw new ServiceException("2000","预支收益还清才可提现");
         }
@@ -201,7 +230,7 @@ public class WalletServiceImpl implements WalletService {
         WalletUserInfo userInfo = walletUserInfoMapper.selectUserInfoForUpdate(userId);
 
         //判断提现条件
-        WalletAdvance advance1 = getNewestAdvance(userId);
+        ZzlmAdvance advance1 = getNewestAdvance(userId);
         if(advance1!=null){
             throw new ServiceException("2000","预支收益还清才可提现");
         }
@@ -210,7 +239,7 @@ public class WalletServiceImpl implements WalletService {
         if(!UserState.已认证储蓄卡.getValue().equals(state) && !UserState.已开通.getValue().equals(state) && !UserState.待审核.getValue().equals(state)){
             throw new ServiceException("2000", "您还未认证储蓄卡");
         }
-        BigDecimal profitBalance = userInfo.getProfitBalance()==null?BigDecimal.ZERO:userInfo.getProfitBalance();//分润余额
+        BigDecimal profitBalance = userInfo.getProfitBalance2()==null?BigDecimal.ZERO:userInfo.getProfitBalance2();//分润余额
 
         if(amount.compareTo(profitBalance)>0){
             throw new ServiceException("2000","提现金额大于余额");
@@ -219,11 +248,11 @@ public class WalletServiceImpl implements WalletService {
         //修改用户分润余额
         WalletUserInfo userInfo1 = new WalletUserInfo();
         userInfo1.setId(userId);
-        userInfo1.setProfitBalance(profitBalance.subtract(amount));
+        userInfo1.setProfitBalance2(profitBalance.subtract(amount));
         walletUserInfoMapper.updateByPrimaryKeySelective(userInfo1);
 
         //添加提现记录
-        WalletIncomeRecords incomeRecords = new WalletIncomeRecords();
+        ZzlmIncomeRecords incomeRecords = new ZzlmIncomeRecords();
         incomeRecords.setUserId(userId);
         incomeRecords.setOrderNum(OrderUtils.creatOrderNum()+ PaymentType.分润代付.getValue());
         incomeRecords.setType(IncomeType.提现.getValue());
@@ -283,14 +312,14 @@ public class WalletServiceImpl implements WalletService {
         //已预支金额
         BigDecimal noRefundAmount = BigDecimal.ZERO;
 
-        Example example = new Example(WalletAdvance.class);
+        Example example = new Example(ZzlmAdvance.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("userId", userId);
         example.setOrderByClause("id desc");
         RowBounds rowBounds = new RowBounds(0,1);
-        List<WalletAdvance> list = walletAdvanceMapper.selectByExampleAndRowBounds(example, rowBounds);
+        List<ZzlmAdvance> list = walletAdvanceMapper.selectByExampleAndRowBounds(example, rowBounds);
         if(list.size()>0){
-            WalletAdvance advance = list.get(0);
+            ZzlmAdvance advance = list.get(0);
             String state = advance.getState();
             if(AdvanceState.已提交.getValue().equals(state)){
                 advanceProfit = BigDecimal.ZERO;
@@ -319,21 +348,21 @@ public class WalletServiceImpl implements WalletService {
      * @return
      */
     @Override
-    public WalletAdvance getNewestAdvance(Long userId){
+    public ZzlmAdvance getNewestAdvance(Long userId){
         List<String> states = new ArrayList<>();
         states.add(AdvanceState.已提交.getValue());
         states.add(AdvanceState.审核不通过.getValue());
         states.add(AdvanceState.已还清.getValue());
 
-        Example example = new Example(WalletAdvance.class);
+        Example example = new Example(ZzlmAdvance.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("userId", userId);
         criteria.andNotIn("state", states);
         example.setOrderByClause("id desc");
         RowBounds rowBounds = new RowBounds(0,1);
-        List<WalletAdvance> list = walletAdvanceMapper.selectByExampleAndRowBounds(example, rowBounds);
+        List<ZzlmAdvance> list = walletAdvanceMapper.selectByExampleAndRowBounds(example, rowBounds);
         if(list.size()>0){
-            WalletAdvance advance = list.get(0);
+            ZzlmAdvance advance = list.get(0);
             BigDecimal noRefundAmount = advance.getNoRefundAmount();
             if(noRefundAmount.compareTo(BigDecimal.ZERO)>0){
                 return  advance;
@@ -351,7 +380,7 @@ public class WalletServiceImpl implements WalletService {
         }
 
         //判断预支条件
-        WalletAdvance advance1 = getNewestAdvance(userId);
+        ZzlmAdvance advance1 = getNewestAdvance(userId);
         if(advance1!=null){
             throw new ServiceException("2000","您还有未还款的预支！");
         }
@@ -362,7 +391,7 @@ public class WalletServiceImpl implements WalletService {
         }
 
         //添加预支记录
-        WalletAdvance advance = new WalletAdvance();
+        ZzlmAdvance advance = new ZzlmAdvance();
         advance.setUserId(userId);
         advance.setChannelOrderNum(OrderUtils.creatOrderNum()+PaymentType.预支收益代付.getValue());
         advance.setBaseAmount(amount);
@@ -375,37 +404,37 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public void updateSign(WalletAdvance advance) {
+    public void updateSign(ZzlmAdvance advance) {
         walletAdvanceMapper.updateByPrimaryKeySelective(advance);
     }
 
     @Override
-    public List<WalletAdvance> advancedIncomeRecords(Long userId, int pageNo) {
-        Example example = new Example(WalletAdvance.class);
+    public List<ZzlmAdvance> advancedIncomeRecords(Long userId, int pageNo) {
+        Example example = new Example(ZzlmAdvance.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("userId", userId);
         example.setOrderByClause("id desc");
         RowBounds rowBounds = new RowBounds((pageNo-1)*20, 20);
 
-        List<WalletAdvance> list = walletAdvanceMapper.selectByExampleAndRowBounds(example, rowBounds);
+        List<ZzlmAdvance> list = walletAdvanceMapper.selectByExampleAndRowBounds(example, rowBounds);
         return list;
     }
 
     @Override
-    public List<WalletAdvanceBill> advancedIncomeBills(Long userId, int pageNo) {
-        Example example = new Example(WalletAdvanceBill.class);
+    public List<ZzlmAdvanceBill> advancedIncomeBills(Long userId, int pageNo) {
+        Example example = new Example(ZzlmAdvanceBill.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("userId", userId);
         example.setOrderByClause("id desc");
         RowBounds rowBounds = new RowBounds((pageNo-1)*20, 20);
 
-        List<WalletAdvanceBill> list = walletAdvanceBillMapper.selectByExampleAndRowBounds(example, rowBounds);
+        List<ZzlmAdvanceBill> list = walletAdvanceBillMapper.selectByExampleAndRowBounds(example, rowBounds);
         return list;
     }
 
     @Override
     public Map<String, BigDecimal> getManageAmount(Long userId) {
-        WalletAdvance advance = getNewestAdvance(userId);
+        ZzlmAdvance advance = getNewestAdvance(userId);
         Map<String, BigDecimal> map = getManageAmount(advance);
         return map;
     }
@@ -413,7 +442,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public Map<String, String> prepayment(Long userId, BigDecimal amount) {
         Map<String, String> result = new HashMap<>();
-        WalletAdvance advance = getNewestAdvance(userId);
+        ZzlmAdvance advance = getNewestAdvance(userId);
         if(advance==null){
             throw new ServiceException("2000","当前没有未还的预支！");
         }
@@ -456,7 +485,7 @@ public class WalletServiceImpl implements WalletService {
      * @param advance
      * @return
      */
-    private Map<String, BigDecimal> getManageAmount(WalletAdvance advance){
+    private Map<String, BigDecimal> getManageAmount(ZzlmAdvance advance){
         Map<String, BigDecimal> map = new HashMap<>();
         if(advance==null){
             return map;
@@ -533,7 +562,7 @@ public class WalletServiceImpl implements WalletService {
         WalletTradeRecords tradeRecords = walletTradeRecordsMapper.selectByPrimaryKey(orderId);
         String orderNo = tradeRecords.getOrderNo();
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(tradeRecords.getUserId());
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
 
         if(!"LKL".equals(channel.getNumber())){
             throw new ServiceException("2000", "当前通道不是拉卡拉");

@@ -1,12 +1,19 @@
 package com.group.wallet.service;
 
-import com.alibaba.fastjson.JSONObject;
-import com.group.wallet.model.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.alibaba.fastjson.JSONObject;
+import com.group.wallet.model.CommonAdvertising;
+import com.group.wallet.model.WalletModule;
+import com.group.wallet.model.WalletReceiveOrder;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.zzlm.ZzlmAdvance;
+import com.group.wallet.model.zzlm.ZzlmAdvanceBill;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
 
 /**
  * 钱包service
@@ -46,7 +53,7 @@ public interface WalletService {
      * @param userId
      * @return
      */
-    List<WalletIncomeRecords> allIncomeRecords(Long userId, String type, Integer pageNo);
+    List<ZzlmIncomeRecords> allIncomeRecords(Long userId, String type, Integer pageNo);
 
     /**
      * 获取收款明细
@@ -81,7 +88,7 @@ public interface WalletService {
      * @param userId
      * @return
      */
-    WalletAdvance getNewestAdvance(Long userId);
+    ZzlmAdvance getNewestAdvance(Long userId);
 
     /**
      * 确认预支
@@ -94,14 +101,14 @@ public interface WalletService {
      * 更新预支签名
      * @param advance
      */
-    void updateSign(WalletAdvance advance);
+    void updateSign(ZzlmAdvance advance);
 
     /**
      * 获取预支明细
      * @param userId
      * @return
      */
-    List<WalletAdvance> advancedIncomeRecords(Long userId, int pageNo);
+    List<ZzlmAdvance> advancedIncomeRecords(Long userId, int pageNo);
 
     /**
      * 获取账单明细
@@ -109,7 +116,7 @@ public interface WalletService {
      * @param pageNo
      * @return
      */
-    List<WalletAdvanceBill> advancedIncomeBills(Long userId, int pageNo);
+    List<ZzlmAdvanceBill> advancedIncomeBills(Long userId, int pageNo);
 
     /**
      * 获取最近一笔未还清的预支的账户管理费和违约金

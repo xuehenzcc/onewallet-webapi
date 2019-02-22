@@ -1,7 +1,14 @@
 package com.group.wallet.service.wal;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.group.core.service.impl.PushService;
 import com.group.utils.DateUtil;
 import com.group.wallet.mapper.CommonMessagesMapper;
@@ -9,27 +16,21 @@ import com.group.wallet.mapper.HomeMapper;
 import com.group.wallet.mapper.WalletIncomeRecordsMapper;
 import com.group.wallet.mapper.WalletUserInfoMapper;
 import com.group.wallet.model.CommonMessages;
-import com.group.wallet.model.WalletIncomeRecords;
 import com.group.wallet.model.WalletTradeRecords;
 import com.group.wallet.model.WalletUserInfo;
 import com.group.wallet.model.enums.IncomeRecordsState;
 import com.group.wallet.model.enums.IncomeType;
-import com.group.wallet.model.enums.MessageType;
-import com.group.wallet.model.vo.*;
-import com.group.wallet.service.ChannelService;
+import com.group.wallet.model.vo.Account;
+import com.group.wallet.model.vo.Adress;
+import com.group.wallet.model.vo.BusinessData;
+import com.group.wallet.model.vo.ChannelVO;
+import com.group.wallet.model.vo.ParamVO;
+import com.group.wallet.model.vo.Pos;
+import com.group.wallet.model.vo.PosLog;
+import com.group.wallet.model.vo.Shop;
+import com.group.wallet.model.vo.ShopOrder;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
 import com.group.wallet.service.SettleService;
-
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class HomeService {
@@ -229,8 +230,9 @@ public class HomeService {
 			}
 			POSList.add(bigPosList.get(i));
 			Date activeTime=p.getActiveTime();
-			int limit=p.getLimitnum();
-			Date endDate= DateUtil.addMonth(activeTime, limit);
+			int limit=p.getLimitnum();//天（180天刷满8万）
+//			Date endDate= DateUtil.addMonth(activeTime, limit);
+			Date endDate= DateUtil.addDay(activeTime, limit);
 			String sn=p.getSn();
 			BigDecimal compAmt=p.getCompAmt();//达标金额
 			BigDecimal totalAmt=BigDecimal.ZERO;
@@ -301,11 +303,6 @@ public class HomeService {
 	 */
 	public void test(BusinessData business){
 		
-//		List<BusinessData> businessList = homeMapper.getBusinessDataList(null);
-//		BusinessData business=new BusinessData();
-//		if(businessList.size()>0){
-//			business=businessList.get(0);
-//		}
 		WalletTradeRecords record=new WalletTradeRecords();
 		record.setUserId(Long.valueOf(business.getUserId()));
 		record.setOrderNo(business.getSn());
@@ -378,8 +375,16 @@ public class HomeService {
 	 */
 	@Transactional
 	public void getUserRelation(Long userId,BigDecimal amt,String sn) throws Exception{
-		amt=amt.divide(BigDecimal.valueOf(3),2);//均分三份
-		updateCalculateResult(IncomeType.激活返现, "激活返现", userId, amt, sn);//返现本人
+//		amt=amt.divide(BigDecimal.valueOf(3),2);//均分三份
+		ParamVO param=new ParamVO();
+		param.setNumber("101");
+		List<ParamVO> paramList=homeMapper.getParam(param);
+		String paramstr=paramList.get(0).getParam();
+		String [] params=paramstr.split(",");
+		BigDecimal zhitui=BigDecimal.valueOf(Long.valueOf(params[0]));//直接 推荐 人 
+		BigDecimal jiantui=BigDecimal.valueOf(Long.valueOf(params[1]));//间接推荐人 
+		BigDecimal hehuoren=BigDecimal.valueOf(Long.valueOf(params[2]));//最近 超级合伙人
+//		updateCalculateResult(IncomeType.激活返现, "激活返现", userId, amt, sn);//返现本人
 		WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
 		int num=0;
 		while(true) {
@@ -391,15 +396,20 @@ public class HomeService {
 				break;
 			}else{
 				if(num==1){
-					updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, amt, sn);//下级返现本人
-					if("F".equals(userType)){
+					if("F".equals(userType)){//超级合伙人
+						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, hehuoren, sn);//下级返现本人
 						break;
+					}else{//直推
+						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, zhitui, sn);//直推
 					}
 				}else{
 					if("F".equals(userType)){//超级合伙人
 						//TODO
-						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, amt, sn);//下级返现本人
+						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, hehuoren, sn);//超级合伙人
 						break;
+					}
+					if(num==2){//间接推荐人 
+						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, jiantui, sn);//间接推荐人 
 					}
 				}
 			}
@@ -416,16 +426,16 @@ public class HomeService {
 	@Transactional
 	public void updateCalculateResult(IncomeType incomeType,String incomeName,Long userId,BigDecimal amt,String sn) throws Exception{
 		WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
-		BigDecimal profitBalance = userInfo.getProfitBalance()==null?BigDecimal.ZERO:userInfo.getProfitBalance();//用户剩余分润金额
+		BigDecimal profitBalance = userInfo.getProfitBalance2()==null?BigDecimal.ZERO:userInfo.getProfitBalance2();//用户剩余分润金额
         BigDecimal profitBalance2 = null;
         profitBalance2 = profitBalance.add(amt);
         
 		WalletUserInfo userInfo1=new WalletUserInfo();
 		userInfo1.setId(userId);
-		userInfo1.setProfitBalance(profitBalance2);
+		userInfo1.setProfitBalance2(profitBalance2);
 		updateUser(userInfo1);//更新统一入口
         //添加分润记录
-        WalletIncomeRecords incomeRecords = new WalletIncomeRecords();
+        ZzlmIncomeRecords incomeRecords = new ZzlmIncomeRecords();
         incomeRecords.setUserId(userInfo.getId());
         incomeRecords.setOrderNum(sn);
         incomeRecords.setType(incomeType.getValue());

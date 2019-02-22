@@ -1,28 +1,39 @@
 package com.group.wallet.channel.quick.youfuPay.impl;
 
-import com.group.core.config.MyWebAppConfig;
-import com.group.core.exception.ServiceException;
-import com.group.utils.SignUtils;
-import com.group.wallet.channel.quick.youfuPay.utils.*;
-import com.group.wallet.mapper.WalletBranchBankMapper;
-import com.group.wallet.mapper.WalletUserInfoMapper;
-import com.group.wallet.service.CommonService;
-import net.sf.json.JSONObject;
-import com.group.wallet.channel.quick.QuickPay;
-import com.group.wallet.model.*;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.apache.commons.codec.binary.Base64;
-import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.group.core.config.MyWebAppConfig;
+import com.group.core.exception.ServiceException;
+import com.group.utils.SignUtils;
+import com.group.wallet.channel.quick.QuickPay;
+import com.group.wallet.channel.quick.youfuPay.utils.HttpClientUtils;
+import com.group.wallet.channel.quick.youfuPay.utils.JSONUtil;
+import com.group.wallet.channel.quick.youfuPay.utils.LocalUtil;
+import com.group.wallet.channel.quick.youfuPay.utils.MessageResponse;
+import com.group.wallet.channel.quick.youfuPay.utils.RSAUtils2;
+import com.group.wallet.mapper.WalletBranchBankMapper;
+import com.group.wallet.mapper.WalletUserInfoMapper;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletBranchBank;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
+import com.group.wallet.service.CommonService;
+
+import net.sf.json.JSONObject;
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class YoufuTm2QuickPayImpl implements QuickPay {
@@ -43,17 +54,17 @@ public class YoufuTm2QuickPayImpl implements QuickPay {
     private WalletBranchBankMapper walletBranchBankMapper;
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         Map<String, Object> result = new HashMap<>();
 
         if(StringUtils.contains(bankCard.getBankName(), "交通银行")){
@@ -74,12 +85,12 @@ public class YoufuTm2QuickPayImpl implements QuickPay {
     }
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception {
         return false;
     }
 
     @Override
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
         Long userId = tradeRecords.getUserId();//交易用户id
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
 
@@ -196,7 +207,7 @@ public class YoufuTm2QuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
         // 机构编号
         String agentnum = "101";
 
@@ -279,7 +290,7 @@ public class YoufuTm2QuickPayImpl implements QuickPay {
     }
 
     @Override
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception {
 
     }
 

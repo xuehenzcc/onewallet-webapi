@@ -1,21 +1,11 @@
 package com.group.wallet.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.group.core.exception.ServiceException;
-import com.group.core.service.impl.PushService;
-import com.group.wallet.channel.ChannelPay;
-import com.group.wallet.channel.FactoryBuilder;
-import com.group.wallet.channel.quick.QuickFactory;
-import com.group.wallet.channel.quick.QuickPay;
-import com.group.wallet.mapper.*;
-import com.group.wallet.model.*;
-import com.group.wallet.model.enums.*;
-import com.group.wallet.service.NoticeService;
-import com.group.wallet.service.PayService;
-import com.group.wallet.service.SettleService;
-import com.group.wallet.util.StringReplaceUtil;
-import com.sun.org.apache.bcel.internal.generic.LNEG;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +13,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.group.core.exception.ServiceException;
+import com.group.core.service.impl.PushService;
+import com.group.wallet.channel.ChannelPay;
+import com.group.wallet.channel.FactoryBuilder;
+import com.group.wallet.mapper.CommonMessagesMapper;
+import com.group.wallet.mapper.WalletAdvanceBillMapper;
+import com.group.wallet.mapper.WalletAdvanceMapper;
+import com.group.wallet.mapper.WalletChannelMapper;
+import com.group.wallet.mapper.WalletIncomeRecordsMapper;
+import com.group.wallet.mapper.WalletReceiveOrderMapper;
+import com.group.wallet.mapper.WalletRefundOrderMapper;
+import com.group.wallet.mapper.WalletTradeRecordsMapper;
+import com.group.wallet.mapper.WalletUpgradeOrderMapper;
+import com.group.wallet.mapper.WalletUserInfoMapper;
+import com.group.wallet.model.CommonMessages;
+import com.group.wallet.model.WalletReceiveOrder;
+import com.group.wallet.model.WalletRefundOrder;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUpgradeOrder;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.enums.AdvanceState;
+import com.group.wallet.model.enums.IncomeRecordsState;
+import com.group.wallet.model.enums.MessageType;
+import com.group.wallet.model.enums.PaymentType;
+import com.group.wallet.model.enums.RefundOrderState;
+import com.group.wallet.model.enums.TradeState;
+import com.group.wallet.model.zzlm.ZzlmAdvance;
+import com.group.wallet.model.zzlm.ZzlmAdvanceBill;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
+import com.group.wallet.service.NoticeService;
+import com.group.wallet.service.SettleService;
+import com.group.wallet.util.StringReplaceUtil;
+
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {
@@ -69,7 +89,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public boolean checkSign(String channelNo ,Map<String, Object> params) throws Exception{
-        WalletChannel channel = new WalletChannel();
+        ZzlmChannel channel = new ZzlmChannel();
         channel.setNumber(channelNo);
         channel = walletChannelMapper.selectOne(channel);
 
@@ -150,20 +170,20 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     public void paymentNotice(String outTradeNo) {
         if(StringUtils.contains(outTradeNo, PaymentType.分润代付.getValue())){
-            Example example = new Example(WalletIncomeRecords.class);
+            Example example = new Example(ZzlmIncomeRecords.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo("orderNum", outTradeNo);
 
-            WalletIncomeRecords incomeRecords = new WalletIncomeRecords();
+            ZzlmIncomeRecords incomeRecords = new ZzlmIncomeRecords();
             incomeRecords.setState(IncomeRecordsState.已到账.getValue());
             walletIncomeRecordsMapper.updateByExampleSelective(incomeRecords, example);
         }
         if(StringUtils.contains(outTradeNo, PaymentType.预支收益代付.getValue())){
-            Example example = new Example(WalletAdvance.class);
+            Example example = new Example(ZzlmAdvance.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo("channelOrderNum", outTradeNo);
 
-            WalletAdvance advance = new WalletAdvance();
+            ZzlmAdvance advance = new ZzlmAdvance();
             advance.setState(AdvanceState.已到账.getValue());
             walletAdvanceMapper.updateByExampleSelective(advance, example);
         }
@@ -248,12 +268,12 @@ public class NoticeServiceImpl implements NoticeService {
         BigDecimal noRefundAmount = refundOrder.getNoRefundAmount()==null?BigDecimal.ZERO:refundOrder.getNoRefundAmount();//未还预支金额
         BigDecimal noRefundAmount1 = BigDecimal.ZERO;
 
-        WalletAdvance advance = walletAdvanceMapper.selectByPrimaryKey(advanceId);
+        ZzlmAdvance advance = walletAdvanceMapper.selectByPrimaryKey(advanceId);
         BigDecimal baseAmount = advance.getBaseAmount();
         int dayCount = advance.getDayCount();
 
         //更新预支收益
-        WalletAdvance advance1 = new WalletAdvance();
+        ZzlmAdvance advance1 = new ZzlmAdvance();
         advance1.setId(advanceId);
         if(amount.compareTo(manageAmount.add(penalAmount).add(noRefundAmount))<0){
             noRefundAmount1 = noRefundAmount.add(manageAmount).add(penalAmount).subtract(amount);
@@ -266,7 +286,7 @@ public class NoticeServiceImpl implements NoticeService {
         walletAdvanceMapper.updateByPrimaryKeySelective(advance1);
 
         //添加还款明细记录
-        WalletAdvanceBill advanceBill = new WalletAdvanceBill();
+        ZzlmAdvanceBill advanceBill = new ZzlmAdvanceBill();
         advanceBill.setAdvanceId(advanceId);
         advanceBill.setUserId(userId);
         advanceBill.setBaseAmount(baseAmount);

@@ -1,36 +1,52 @@
 package com.group.wallet.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.group.core.exception.ServiceException;
-import com.group.utils.BigDecimalArith;
-import com.group.utils.HttpClientUtils;
-import com.group.utils.OrderUtils;
-import com.group.wallet.channel.ChannelFactory;
-import com.group.wallet.channel.ChannelPay;
-import com.group.wallet.channel.FactoryBuilder;
-import com.group.wallet.channel.payment.PaymentFactory;
-import com.group.wallet.channel.payment.PaymentPay;
-import com.group.wallet.mapper.*;
-import com.group.wallet.model.*;
-import com.group.wallet.model.enums.*;
-import com.group.wallet.channel.quick.QuickFactory;
-import com.group.wallet.channel.quick.QuickPay;
-import com.group.wallet.service.PayService;
-import com.group.wallet.service.SettleService;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.*;
+import com.alibaba.fastjson.JSON;
+import com.group.core.exception.ServiceException;
+import com.group.utils.OrderUtils;
+import com.group.wallet.channel.ChannelPay;
+import com.group.wallet.channel.FactoryBuilder;
+import com.group.wallet.channel.payment.PaymentFactory;
+import com.group.wallet.channel.payment.PaymentPay;
+import com.group.wallet.channel.quick.QuickPay;
+import com.group.wallet.mapper.WalletBankCardMapper;
+import com.group.wallet.mapper.WalletChannelMapper;
+import com.group.wallet.mapper.WalletChannelMerMapper;
+import com.group.wallet.mapper.WalletDeductRateMapper;
+import com.group.wallet.mapper.WalletSubCardMapper;
+import com.group.wallet.mapper.WalletTradeRecordsMapper;
+import com.group.wallet.mapper.WalletUserInfoMapper;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletDeductRate;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.enums.ChannelMerType;
+import com.group.wallet.model.enums.ChannelType;
+import com.group.wallet.model.enums.DeductType;
+import com.group.wallet.model.enums.SettleType;
+import com.group.wallet.model.enums.TradeState;
+import com.group.wallet.model.enums.UserState;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
+import com.group.wallet.service.PayService;
+import com.group.wallet.service.SettleService;
 
 @Service
 public class PayServiceImpl implements PayService {
@@ -108,7 +124,7 @@ public class PayServiceImpl implements PayService {
     @Transactional
     public Map<String, Object> registSubMerchant(Long channelId, Long userId, Long bankCardId, String settleType) throws Exception{
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
         WalletBankCard bankCard = walletBankCardMapper.selectByPrimaryKey(bankCardId);
         ChannelPay channelPay = FactoryBuilder.build(channel.getChannelType()).getChannelPay(channel);
 
@@ -123,16 +139,16 @@ public class PayServiceImpl implements PayService {
 
         if(rate!=null && rate.compareTo(BigDecimal.ZERO)>0){
 
-            WalletChannelMer channelMer2 = new WalletChannelMer();
+            ZzlmChannelMer channelMer2 = new ZzlmChannelMer();
             channelMer2.setChannelId(channelId);//1，通道id
             channelMer2.setUserId(userId); //2，用户id
             //channelMer2.setCardNo(cardNo);//3，结算银行卡
             channelMer2.setType(ChannelMerType.一对一商户.getValue());//4，子商户类型
             channelMer2.setSettleType(settleType);//5，结算类型
-            List<WalletChannelMer> channelMers = walletChannelMerMapper.select(channelMer2);
+            List<ZzlmChannelMer> channelMers = walletChannelMerMapper.select(channelMer2);
 
             if(channelMers==null || channelMers.size()==0){
-                WalletChannelMer channelMer1 = new WalletChannelMer();
+                ZzlmChannelMer channelMer1 = new ZzlmChannelMer();
                 channelMer1.setChannelId(channelId);
                 channelMer1.setUserId(userId);
                 channelMer1.setCardNo(cardNo);
@@ -159,7 +175,7 @@ public class PayServiceImpl implements PayService {
                         //四方通道特殊处理
                         //没有修改费率
                         if(deductRate.compareTo(rate)==0 && poundage1.compareTo(poundage)==0){
-                            WalletChannelMer channelMer1 = new WalletChannelMer();
+                            ZzlmChannelMer channelMer1 = new ZzlmChannelMer();
                             channelMer1.setId(channelMer2.getId());
                             channelMer1.setCardNo(cardNo);
                             channelMer1.setDeductRate(rate);
@@ -172,7 +188,7 @@ public class PayServiceImpl implements PayService {
                         }
                         //修改费率或者结算卡
                         else {
-                            WalletChannelMer channelMer1 = new WalletChannelMer();
+                            ZzlmChannelMer channelMer1 = new ZzlmChannelMer();
                             channelMer1.setId(channelMer2.getId());
                             channelMer1.setCardNo(cardNo);
                             channelMer1.setDeductRate(rate);
@@ -186,7 +202,7 @@ public class PayServiceImpl implements PayService {
                     }
                     else {
                         if(deductRate.compareTo(rate)!=0 || poundage1.compareTo(poundage)!=0 || !cardNo.equals(cardNo1)){
-                            WalletChannelMer channelMer1 = new WalletChannelMer();
+                            ZzlmChannelMer channelMer1 = new ZzlmChannelMer();
                             channelMer1.setId(channelMer2.getId());
                             channelMer1.setCardNo(cardNo);
                             channelMer1.setDeductRate(rate);
@@ -218,7 +234,7 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public Map<String, Object> quickPay(Long userId, Long channelId, Long bankCardId, BigDecimal orderPrice, String settleType, Double lon, Double lat, String tradeAddress) throws Exception{
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
         if(!UserState.已开通.getValue().equals(userInfo.getState())){
             throw new ServiceException("2000", "您还未审核通过！");
@@ -231,13 +247,13 @@ public class PayServiceImpl implements PayService {
         WalletBankCard bankCard = walletBankCardMapper.selectByPrimaryKey(bankCardId);
 
         //查询用户在通道注册的自商户
-        WalletChannelMer channelMer = new WalletChannelMer();
+        ZzlmChannelMer channelMer = new ZzlmChannelMer();
         channelMer.setChannelId(channelId);
         channelMer.setUserId(userId);
         channelMer.setCardNo(userInfo.getSettleCardNo());
         channelMer.setType(ChannelMerType.一对一商户.getValue());
         channelMer.setSettleType(settleType);
-        List<WalletChannelMer> channelMers = walletChannelMerMapper.select(channelMer);
+        List<ZzlmChannelMer> channelMers = walletChannelMerMapper.select(channelMer);
         if(CollectionUtils.isEmpty(channelMers)){
             throw new ServiceException("2000", "商户未在通道注册");
         }
@@ -289,7 +305,7 @@ public class PayServiceImpl implements PayService {
         bankCard.setValidThru((String) params.get("validThru"));
         bankCard.setCvv((String) params.get("cvv2"));
 
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
         QuickPay quickPay = (QuickPay) FactoryBuilder.build(channel.getChannelType()).getChannelPay(channel);
         Map<String, Object> result = quickPay.sendSMSCode(channel, tradeRecords, bankCard);
         return result;
@@ -311,7 +327,7 @@ public class PayServiceImpl implements PayService {
         bankCard.setValidThru((String) params.get("validThru"));
         bankCard.setCvv((String) params.get("cvv2"));
 
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(tradeRecords.getUserId());
         QuickPay quickPay = (QuickPay) FactoryBuilder.build(channel.getChannelType()).getChannelPay(channel);
         Map<String, Object> result = quickPay.quickPayConfirm(userInfo, channel, tradeRecords, bankCard, params);
@@ -327,7 +343,7 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public void settlement(String channelNo, Map<String, Object> params) throws Exception {
-        WalletChannel channel = new WalletChannel();
+        ZzlmChannel channel = new ZzlmChannel();
         channel.setNumber(channelNo);
         channel = walletChannelMapper.selectOne(channel);
         QuickPay quickPay = (QuickPay) FactoryBuilder.build(channel.getChannelType()).getChannelPay(channel);
@@ -368,7 +384,7 @@ public class PayServiceImpl implements PayService {
         bizContent.put("bank_account_type", "personal");
         bizContent.put("bank_card_type", "debit");
 
-        WalletChannel channel = new WalletChannel();
+        ZzlmChannel channel = new ZzlmChannel();
         channel.setNumber(channelNum);
         channel = walletChannelMapper.selectOne(channel);
 
@@ -388,7 +404,7 @@ public class PayServiceImpl implements PayService {
         Long channelId = walletTradeRecords.getChannelId();
         Long userId = walletTradeRecords.getUserId();
 
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(channelId);
 
         String channelNo = channel.getNumber();
         if(!"YIBAO".equals(channelNo)){
@@ -398,7 +414,7 @@ public class PayServiceImpl implements PayService {
             throw new ServiceException("2000", "出款金额必须大于0");
         }
 
-        WalletChannelMer channelMer2 = new WalletChannelMer();
+        ZzlmChannelMer channelMer2 = new ZzlmChannelMer();
         channelMer2.setChannelId(channelId);
         channelMer2.setUserId(userId);
         //channelMer2.setCardNo(userInfo.getSettleCardNo());
@@ -439,7 +455,7 @@ public class PayServiceImpl implements PayService {
         Long bankCardId = tradeRecords.getBankCardId();//信用卡id
 
         WalletBankCard bankCard = walletBankCardMapper.selectByPrimaryKey(bankCardId);
-        WalletChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
+        ZzlmChannel channel = walletChannelMapper.selectByPrimaryKey(tradeRecords.getChannelId());
 
         Map<String, Object> map = new HashMap<>();
         map.put("orderNo", orderNo);

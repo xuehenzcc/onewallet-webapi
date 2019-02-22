@@ -1,24 +1,47 @@
 package com.group.wallet.service.impl;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.group.core.exception.ServiceException;
 import com.group.core.quartz.QuartzJobModel;
 import com.group.core.service.QuartzService;
 import com.group.utils.DateUtil;
 import com.group.utils.OrderUtils;
-import com.group.wallet.mapper.*;
-import com.group.wallet.model.*;
-import com.group.wallet.model.enums.*;
+import com.group.wallet.mapper.WalletBankCardMapper;
+import com.group.wallet.mapper.WalletChannelMapper;
+import com.group.wallet.mapper.WalletPlanDetailMapper;
+import com.group.wallet.mapper.WalletPlanMapper;
+import com.group.wallet.mapper.WalletUpgradeOrderMapper;
+import com.group.wallet.mapper.WalletUserInfoMapper;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletPlan;
+import com.group.wallet.model.WalletPlanDetail;
+import com.group.wallet.model.WalletUpgradeOrder;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.enums.OrderType;
+import com.group.wallet.model.enums.PlanDetailState;
+import com.group.wallet.model.enums.PlanState;
+import com.group.wallet.model.enums.SettleType;
+import com.group.wallet.model.enums.UpgradeType;
+import com.group.wallet.model.enums.UserCreditType;
+import com.group.wallet.model.zzlm.ZzlmChannel;
 import com.group.wallet.service.ExecuteJobService;
 import com.group.wallet.service.RepaymentCreditCardService;
 import com.group.wallet.service.SettleService;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
-import java.util.*;
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class RepaymentCreditCardServiceImpl implements RepaymentCreditCardService {
@@ -107,7 +130,7 @@ public class RepaymentCreditCardServiceImpl implements RepaymentCreditCardServic
         List<BigDecimal> list = sealOff(amount, count);
 
         //获取商户在还卡通道的t0，t1汇率
-        WalletChannel channel = new WalletChannel();
+        ZzlmChannel channel = new ZzlmChannel();
         channel.setNumber("WS");
         channel = walletChannelMapper.selectOne(channel);
 
@@ -373,7 +396,7 @@ public class RepaymentCreditCardServiceImpl implements RepaymentCreditCardServic
         String creditTypeName = userInfo.getCreditTypeName();
 
         //获取商户在还卡通道的t0，t1汇率
-        WalletChannel channel = new WalletChannel();
+        ZzlmChannel channel = new ZzlmChannel();
         channel.setNumber("WS");
         channel = walletChannelMapper.selectOne(channel);
 

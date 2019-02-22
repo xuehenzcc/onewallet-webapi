@@ -1,16 +1,15 @@
 package com.group.wallet.mapper;
 
-import com.group.utils.MyMapper;
-import com.group.wallet.model.WalletIncomeRecords;
-import com.group.wallet.model.WalletIncomeRecordsExample;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
-public interface WalletIncomeRecordsMapper extends MyMapper<WalletIncomeRecords>{
+import com.group.utils.MyMapper;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
+
+public interface WalletIncomeRecordsMapper extends MyMapper<ZzlmIncomeRecords>{
 
     /**
      * 查询总共累计收益

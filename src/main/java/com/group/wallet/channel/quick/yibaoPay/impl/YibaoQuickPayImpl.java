@@ -1,5 +1,20 @@
 package com.group.wallet.channel.quick.yibaoPay.impl;
 
+import java.io.File;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -12,23 +27,14 @@ import com.group.wallet.channel.quick.yibaoPay.utils.AESUtil;
 import com.group.wallet.channel.quick.yibaoPay.utils.Digest;
 import com.group.wallet.mapper.WalletTradeRecordsMapper;
 import com.group.wallet.mapper.WalletUserInfoMapper;
-import com.group.wallet.model.*;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
 import com.group.wallet.model.enums.TradeState;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * 易宝支付
@@ -51,7 +57,7 @@ public class YibaoQuickPayImpl implements QuickPay {
 
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         //1，查询子商户
         Map<String, String> customerInfo = customerInforQuery(userInfo, channel);
         String customerNumber = customerInfo.get("ledgeCustomerNumber");//商户编号
@@ -86,7 +92,7 @@ public class YibaoQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
@@ -95,7 +101,7 @@ public class YibaoQuickPayImpl implements QuickPay {
      * @param userInfo
      * @return
      */
-    private Map<String, String> customerInforQuery(WalletUserInfo userInfo, WalletChannel channel) throws Exception{
+    private Map<String, String> customerInforQuery(WalletUserInfo userInfo, ZzlmChannel channel) throws Exception{
         Map<String, String> map = new HashMap<>();
         String key = channel.getMd5Key(); // 商户秘钥
         String customertype = "CUSTOMER";
@@ -149,7 +155,7 @@ public class YibaoQuickPayImpl implements QuickPay {
      * @param userInfo
      * @return
      */
-    private String register(WalletUserInfo userInfo, WalletChannel channel) throws Exception{
+    private String register(WalletUserInfo userInfo, ZzlmChannel channel) throws Exception{
         String key = channel.getMd5Key(); // 商户秘钥
         String requestid = UUID.randomUUID().toString().substring(0, 15);  //注册请求号，每次请求唯一
         String customertype = "PERSON";// 企业-ENTERPRISE,个体工商户-INDIVIDUAL,个人-PERSON
@@ -259,7 +265,7 @@ public class YibaoQuickPayImpl implements QuickPay {
      * @param rate
      * @throws Exception
      */
-    private void feeSetApi(WalletUserInfo userInfo, WalletChannel channel, String customerNumber, String productType, String rate) throws Exception{
+    private void feeSetApi(WalletUserInfo userInfo, ZzlmChannel channel, String customerNumber, String productType, String rate) throws Exception{
         String key = channel.getMd5Key(); // 商户秘钥
 
         StringBuffer signature = new StringBuffer();
@@ -295,7 +301,7 @@ public class YibaoQuickPayImpl implements QuickPay {
      * @param channel
      * @throws Exception
      */
-    private void customerInforUpdate(WalletUserInfo userInfo, WalletChannel channel, String customerNumber) throws Exception{
+    private void customerInforUpdate(WalletUserInfo userInfo, ZzlmChannel channel, String customerNumber) throws Exception{
         String key = channel.getMd5Key(); // 商户秘钥
         String bankCardNumber = userInfo.getSettleCardNo();
         String bankName = userInfo.getSettleBank();
@@ -329,7 +335,7 @@ public class YibaoQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         DecimalFormat df = new DecimalFormat("#.##");
         Map<String, Object> map = new HashMap<>();
 
@@ -400,17 +406,17 @@ public class YibaoQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
         return null;
     }
 
     @Override
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception {
         logger.info("===易宝结算===");
         String key = channel.getMd5Key(); // 商户秘钥
 
@@ -448,7 +454,7 @@ public class YibaoQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception {
         String source = (String) params.get("source");
         String hmac = (String) params.get("hmac");
 

@@ -1,11 +1,8 @@
 package com.group.wallet.mapper;
 
 import com.group.utils.MyMapper;
-import com.group.wallet.model.WalletChannelMer;
-import com.group.wallet.model.WalletChannelMerExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 
-public interface WalletChannelMerMapper extends MyMapper<WalletChannelMer>{
+public interface WalletChannelMerMapper extends MyMapper<ZzlmChannelMer>{
 
 }

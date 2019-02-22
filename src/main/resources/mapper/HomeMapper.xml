@@ -3,6 +3,18 @@
 
 <mapper namespace="com.group.wallet.mapper.HomeMapper">
 
+<!-- 获取配置参数 -->
+ <select id="getParam" resultType="com.group.wallet.model.vo.ParamVO">
+ 	SELECT id,number,NAME,param,remark1,remark2,create_time FROM zzlm_config
+ 	<where>
+ 		<if test="number != null">
+ 			and number=#{number}
+ 		</if>
+ 		<if test="id != null">
+ 			and id=#{id}
+ 		</if>
+ 	</where>
+ </select>
  <!-- 添加地址 -->
  <insert id="addAddress" useGeneratedKeys="true" keyProperty="id">
  	INSERT INTO wallet_address_zcc 
@@ -464,11 +476,11 @@
  </select>
  
   <select id="getChannelList" resultType="com.group.wallet.model.vo.ChannelVO">
-	 	 SELECT id,number,NAME FROM wallet_channel WHERE number='ZZLM'
+	 	 SELECT id,number,NAME FROM zzlm_channel WHERE number='ZZLM'
  </select>
  <!-- 更新POS类型到 收益表 -->
  <update id="updateIncomeByPosType">
- 	UPDATE wallet_income_records SET channel_order_num=(SELECT TYPE FROM wallet_pos_zcc WHERE sn=order_num)
+ 	UPDATE zzlm_income_records SET channel_order_num=(SELECT TYPE FROM wallet_pos_zcc WHERE sn=order_num)
 	WHERE channel_order_num IS NULL
  </update>
 </mapper>

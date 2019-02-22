@@ -5,6 +5,7 @@ import com.group.utils.SpringUtil;
 import com.group.wallet.channel.ChannelFactory;
 import com.group.wallet.channel.quick.fuhtPay.impl.FuhtQuickPayImpl;
 import com.group.wallet.channel.quick.lingchuangPay.impl.LingchuangQuickPayImpl;
+import com.group.wallet.channel.quick.shenzhouPay.impl.ShenzhouQuickPayImpl;
 import com.group.wallet.channel.quick.sifangPay.impl.SifangQuickPayImpl;
 import com.group.wallet.channel.quick.weishuaPay.impl.WeishuaQuickPayImpl;
 import com.group.wallet.channel.quick.yibaoPay.impl.YibaoQuickPayImpl;
@@ -13,9 +14,18 @@ import com.group.wallet.channel.quick.youfuPay.impl.YoufuTm2QuickPayImpl;
 import com.group.wallet.channel.quick.youfuPay.impl.YoufuTm4QuickPayImpl;
 import com.group.wallet.channel.quick.youfuPay.impl.YoufuTmQuickPayImpl;
 import com.group.wallet.channel.quick.ysbPay.impl.YsbQuickPayImpl;
-import com.group.wallet.channel.quick.zheyangPay.impl.*;
-import com.group.wallet.model.WalletChannel;
-import com.group.wallet.channel.quick.shenzhouPay.impl.ShenzhouQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangHFHZQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangHFQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangHZXE1QuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangKB5QuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangKJTQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangLDQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangSHYBQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangXE7QuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangXEQuickPayImpl;
+import com.group.wallet.channel.quick.zheyangPay.impl.ZheyangYqQuickPayImpl;
+import com.group.wallet.model.zzlm.ZzlmChannel;
 
 /**
  * 快捷支付工厂类，负责创建快捷通道
@@ -23,7 +33,7 @@ import com.group.wallet.channel.quick.shenzhouPay.impl.ShenzhouQuickPayImpl;
 public class QuickFactory implements ChannelFactory {
 
     @Override
-    public QuickPay getChannelPay(WalletChannel channel){
+    public QuickPay getChannelPay(ZzlmChannel channel){
         String channelNo = channel.getNumber();
 
         if("SZZF".equals(channelNo)){

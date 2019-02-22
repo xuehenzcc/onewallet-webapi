@@ -1,5 +1,12 @@
 package com.group.wallet.channel.quick.zheyangPay.impl;
 
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -8,16 +15,14 @@ import com.group.utils.HttpClientUtils;
 import com.group.utils.MD5;
 import com.group.wallet.channel.quick.QuickPay;
 import com.group.wallet.mapper.WalletTradeRecordsMapper;
-import com.group.wallet.model.*;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
 import com.group.wallet.model.enums.TradeState;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class ZheyangQuickPayImpl implements QuickPay {
@@ -26,17 +31,17 @@ public class ZheyangQuickPayImpl implements QuickPay {
     private WalletTradeRecordsMapper walletTradeRecordsMapper;
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         JSONObject content = new JSONObject();
         JSONObject obj = new JSONObject();
         String method = "fastpayPrecreate2";
@@ -110,22 +115,22 @@ public class ZheyangQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
         return null;
     }
 
     @Override
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception {
 
     }
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception{
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception{
         String bizOrderNumber = (String) params.get("bizOrderNumber");
         String completedTime = (String) params.get("completedTime");
         String mid = (String) params.get("mid");

@@ -1,12 +1,13 @@
 package com.group.wallet.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.group.core.annotation.ActionAnnotation;
-import com.group.core.commons.SysCode;
-import com.group.core.controller.BaseController;
-import com.group.core.service.QiniuyunService;
-import com.group.wallet.model.*;
-import com.group.wallet.service.WalletService;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -14,12 +15,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
+import com.group.core.annotation.ActionAnnotation;
+import com.group.core.commons.SysCode;
+import com.group.core.controller.BaseController;
+import com.group.core.service.QiniuyunService;
+import com.group.wallet.model.CommonAdvertising;
+import com.group.wallet.model.WalletModule;
+import com.group.wallet.model.WalletReceiveOrder;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.zzlm.ZzlmAdvance;
+import com.group.wallet.model.zzlm.ZzlmAdvanceBill;
+import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
+import com.group.wallet.service.WalletService;
 
 /**
  * 钱包
@@ -150,11 +158,11 @@ public class WalletController extends BaseController {
         Assert.hasLength(type, "type不能为空");
         Assert.hasLength(pageNo, "pageNo不能为空");
 
-        List<WalletIncomeRecords> list = walletService.allIncomeRecords(Long.parseLong(userId), type, Integer.parseInt(pageNo));
+        List<ZzlmIncomeRecords> list = walletService.allIncomeRecords(Long.parseLong(userId), type, Integer.parseInt(pageNo));
         Map<Class<?>, String[]> includes = new HashMap<Class<?>, String[]>() {
             private static final long serialVersionUID = -5349178483472578926L;
             {
-                put(WalletIncomeRecords.class, new String[] {"id","userId","phone","name","userType","type","typeName","amount","stateName","descp","createTime"});
+                put(ZzlmIncomeRecords.class, new String[] {"id","userId","phone","name","userType","type","typeName","amount","stateName","descp","createTime"});
             }
         };
         renderJson(request, response, SysCode.SUCCESS, list, includes);
@@ -276,7 +284,7 @@ public class WalletController extends BaseController {
         Assert.hasLength(advanceId, "advanceId不能为空");
 
         String imageUrl =  qiniuyunService.uploadByest(signImage.getBytes(),null);
-        WalletAdvance advance = new WalletAdvance();
+        ZzlmAdvance advance = new ZzlmAdvance();
         advance.setId(Long.parseLong(advanceId));
         advance.setSignature(imageUrl);
 
@@ -300,11 +308,11 @@ public class WalletController extends BaseController {
         Assert.hasLength(userId, "userId不能为空");
         Assert.hasLength(pageNo, "pageNo不能为空");
 
-        List<WalletAdvance> list = walletService.advancedIncomeRecords(Long.parseLong(userId), Integer.parseInt(pageNo));
+        List<ZzlmAdvance> list = walletService.advancedIncomeRecords(Long.parseLong(userId), Integer.parseInt(pageNo));
         Map<Class<?>, String[]> includes = new HashMap<Class<?>, String[]>() {
             private static final long serialVersionUID = -5349178483472578926L;
             {
-                put(WalletAdvance.class, new String[] {"id","userId","baseAmount","noRefundAmount","state","stateName","createTime"});
+                put(ZzlmAdvance.class, new String[] {"id","userId","baseAmount","noRefundAmount","state","stateName","createTime"});
             }
         };
         renderJson(request, response, SysCode.SUCCESS, list, includes);
@@ -326,11 +334,11 @@ public class WalletController extends BaseController {
         Assert.hasLength(userId, "userId不能为空");
         Assert.hasLength(pageNo, "pageNo不能为空");
 
-        List<WalletAdvanceBill> list = walletService.advancedIncomeBills(Long.parseLong(userId), Integer.parseInt(pageNo));
+        List<ZzlmAdvanceBill> list = walletService.advancedIncomeBills(Long.parseLong(userId), Integer.parseInt(pageNo));
         Map<Class<?>, String[]> includes = new HashMap<Class<?>, String[]>() {
             private static final long serialVersionUID = -5349178483472578926L;
             {
-                put(WalletAdvanceBill.class, new String[] {"id","baseAmount","yesProfit","manageAmount","penalAmount","noRefundAmount","refundAmount","dayCount","createTime"});
+                put(ZzlmAdvanceBill.class, new String[] {"id","baseAmount","yesProfit","manageAmount","penalAmount","noRefundAmount","refundAmount","dayCount","createTime"});
             }
         };
         renderJson(request, response, SysCode.SUCCESS, list, includes);

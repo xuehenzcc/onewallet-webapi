@@ -9,6 +9,8 @@ import com.group.wallet.mapper.WalletSubCardMapper;
 import com.group.wallet.mapper.WalletTradeRecordsMapper;
 import com.group.wallet.model.*;
 import com.group.wallet.model.enums.TradeState;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 import com.group.wallet.channel.quick.QuickPay;
 import com.group.wallet.channel.quick.shenzhouPay.utils.MerchantApiUtil;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +34,7 @@ public class ShenzhouQuickPayImpl implements QuickPay {
     private WalletSubCardMapper walletSubCardMapper;
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         Map<String, String> paramMap = new HashMap<>();
 
         String onDeaName = userInfo.getRealName();//注册商户名
@@ -77,7 +79,7 @@ public class ShenzhouQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
@@ -114,7 +116,7 @@ public class ShenzhouQuickPayImpl implements QuickPay {
     }*/
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         Map<String, String> paramMap = new HashMap<String, String>();
         paramMap.put("productType", "40000302");
         paramMap.put("payKey", channel.getPayKey());// 商户支付Key
@@ -179,12 +181,12 @@ public class ShenzhouQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
         /*Map<String, String> map = JSON.parseObject(json, Map.class);
         String result = HttpClientUtils.sendPost(channel.getChannelUrl()+"quickGateWayPay/hcqPay", map, null, "utf-8");
         JSONObject result1 = JSON.parseObject(result);
@@ -204,7 +206,7 @@ public class ShenzhouQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception {
 
     }
 
@@ -229,7 +231,7 @@ public class ShenzhouQuickPayImpl implements QuickPay {
     }*/
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception{
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception{
 
 
         return true;

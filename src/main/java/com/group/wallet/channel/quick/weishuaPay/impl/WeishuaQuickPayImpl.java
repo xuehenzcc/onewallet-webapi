@@ -1,7 +1,21 @@
 package com.group.wallet.channel.quick.weishuaPay.impl;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.group.core.config.MyWebAppConfig;
 import com.group.core.exception.ServiceException;
 import com.group.utils.HttpClientUtils;
@@ -9,18 +23,15 @@ import com.group.utils.MD5;
 import com.group.utils.SignUtils;
 import com.group.wallet.channel.quick.QuickPay;
 import com.group.wallet.mapper.WalletBranchBankMapper;
-import com.group.wallet.model.*;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletBranchBank;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 import com.group.wallet.service.CommonService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.*;
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class WeishuaQuickPayImpl implements QuickPay {
@@ -36,7 +47,7 @@ public class WeishuaQuickPayImpl implements QuickPay {
     private WalletBranchBankMapper walletBranchBankMapper;
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         String channelMerchantNo = "";
         Map<String, Object> map = registInfo(userInfo, channel, channelMer);
         String returncode = (String) map.get("returncode");
@@ -63,7 +74,7 @@ public class WeishuaQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         //修改报件
         Map<String, Object> map = updateInfo(userInfo, channel, channelMer);
         String returncode = (String) map.get("returncode");
@@ -76,7 +87,7 @@ public class WeishuaQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         Map<String, Object> result = new HashMap<>();
 
         Map<String, String> params = new HashMap<>();
@@ -91,12 +102,12 @@ public class WeishuaQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
         Map<String, Object> paramMap = new HashMap<>();
 
         paramMap.put("transcode", "026");//交易码
@@ -148,12 +159,12 @@ public class WeishuaQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception {
 
     }
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception {
         String sign = (String) params.get("sign");
         params.remove("sign");
         String sign2 = getSign(params);
@@ -177,7 +188,7 @@ public class WeishuaQuickPayImpl implements QuickPay {
      * @return
      * @throws Exception
      */
-    private Map<String, Object> registInfo(WalletUserInfo userInfo, WalletChannel channel, WalletChannelMer channelMer) throws Exception{
+    private Map<String, Object> registInfo(WalletUserInfo userInfo, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception{
         Example example = new Example(WalletBranchBank.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("branchBankName", userInfo.getSettleBank());
@@ -217,7 +228,7 @@ public class WeishuaQuickPayImpl implements QuickPay {
      * @return
      * @throws Exception
      */
-    private Map<String, Object> updateInfo(WalletUserInfo userInfo, WalletChannel channel, WalletChannelMer channelMer) throws Exception{
+    private Map<String, Object> updateInfo(WalletUserInfo userInfo, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception{
         Example example = new Example(WalletBranchBank.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("branchBankName", userInfo.getSettleBank());

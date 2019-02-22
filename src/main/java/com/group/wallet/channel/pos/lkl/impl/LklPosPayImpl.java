@@ -1,24 +1,36 @@
 package com.group.wallet.channel.pos.lkl.impl;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.group.core.exception.ServiceException;
 import com.group.core.service.QiniuyunService;
 import com.group.utils.HttpClientUtils;
 import com.group.wallet.channel.pos.PosPay;
-import com.group.wallet.channel.pos.lkl.bean.*;
-import com.group.wallet.channel.pos.lkl.config.LklPayConfig;
-import com.group.wallet.channel.pos.lkl.rsa.RSAEncryptByPrivateKey;
+import com.group.wallet.channel.pos.lkl.bean.BanckCardBean;
+import com.group.wallet.channel.pos.lkl.bean.MerchantBean;
+import com.group.wallet.channel.pos.lkl.bean.MerchantDetailBean;
+import com.group.wallet.channel.pos.lkl.bean.MerchantQueryBean;
+import com.group.wallet.channel.pos.lkl.bean.OrderBean;
+import com.group.wallet.channel.pos.lkl.bean.OrderQueryBean;
 import com.group.wallet.mapper.WalletBranchBankMapper;
-import com.group.wallet.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletBranchBank;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class LklPosPayImpl implements PosPay{
@@ -30,7 +42,7 @@ public class LklPosPayImpl implements PosPay{
     private WalletBranchBankMapper walletBranchBankMapper;
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         //商户进件
         regisInfo(userInfo, channel);
         //绑定结算卡
@@ -40,12 +52,12 @@ public class LklPosPayImpl implements PosPay{
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         OrderBean bean = new OrderBean();
         bean.setApp_merch_no(userInfo.getPhone());
         bean.setApp_order_no(tradeRecords.getOrderNo());
@@ -75,7 +87,7 @@ public class LklPosPayImpl implements PosPay{
     }
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception {
         return true;
     }
 
@@ -86,7 +98,7 @@ public class LklPosPayImpl implements PosPay{
      * @return
      * @throws Exception
      */
-    private void regisInfo(WalletUserInfo userInfo, WalletChannel channel) throws Exception{
+    private void regisInfo(WalletUserInfo userInfo, ZzlmChannel channel) throws Exception{
         MerchantBean merch = new MerchantBean();
         merch.setApp_merch_no(userInfo.getPhone());
         merch.setMerch_name(userInfo.getRealName());
@@ -121,7 +133,7 @@ public class LklPosPayImpl implements PosPay{
      * @param channel
      * @throws Exception
      */
-    private void bindCard(WalletUserInfo userInfo, WalletChannel channel) throws Exception{
+    private void bindCard(WalletUserInfo userInfo, ZzlmChannel channel) throws Exception{
         Example example = new Example(WalletBranchBank.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("branchBankName", userInfo.getSettleBank());
@@ -161,7 +173,7 @@ public class LklPosPayImpl implements PosPay{
      * @param merchNo
      * @return
      */
-    public JSONObject getLklUserInfo(String merchNo, WalletChannel channel) throws Exception{
+    public JSONObject getLklUserInfo(String merchNo, ZzlmChannel channel) throws Exception{
         MerchantQueryBean bean = new MerchantQueryBean();
         bean.setApp_merch_no(merchNo);
         String param = bean.requestParam();
@@ -185,7 +197,7 @@ public class LklPosPayImpl implements PosPay{
      * @param channel
      * @throws Exception
      */
-    public JSONObject getOrderDetail(String orderNo, String merchNo, WalletChannel channel) throws Exception{
+    public JSONObject getOrderDetail(String orderNo, String merchNo, ZzlmChannel channel) throws Exception{
         OrderQueryBean bean = new OrderQueryBean();
         bean.setApp_order_no(orderNo);
         bean.setApp_merch_no(merchNo);

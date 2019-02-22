@@ -2,7 +2,6 @@ package com.group.wallet.service.impl;
 
 import com.group.wallet.mapper.WalletChannelMapper;
 import com.group.wallet.mapper.WalletDeductRateMapper;
-import com.group.wallet.model.WalletChannel;
 import com.group.wallet.model.WalletDeductRate;
 import com.group.wallet.model.enums.DeductType;
 import com.group.wallet.service.ChannelService;

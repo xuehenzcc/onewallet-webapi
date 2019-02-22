@@ -1,17 +1,15 @@
 package com.group.wallet.model;
 
-import com.group.core.config.MyWebAppConfig;
+import java.math.BigDecimal;
+import java.util.Date;
+
+import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.group.core.model.BaseEntity2;
 import com.group.wallet.model.enums.UserCreditType;
 import com.group.wallet.model.enums.UserType;
-import org.apache.commons.lang.StringUtils;
-import org.junit.Ignore;
-
-import javax.persistence.Column;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import java.math.BigDecimal;
-import java.util.Date;
 
 public class WalletUserInfo extends BaseEntity2{
 
@@ -51,7 +49,8 @@ public class WalletUserInfo extends BaseEntity2{
 
     private BigDecimal accountBalance;
 
-    private BigDecimal profitBalance;
+//    private BigDecimal profitBalance;
+    private BigDecimal profitBalance2;//至尊联盟-分润余额
 
     private String settleCardNo;
 
@@ -103,7 +102,16 @@ public class WalletUserInfo extends BaseEntity2{
     private Date createTime;
 
 
-    public String getPhone() {
+    
+    public BigDecimal getProfitBalance2() {
+		return profitBalance2;
+	}
+
+	public void setProfitBalance2(BigDecimal profitBalance2) {
+		this.profitBalance2 = profitBalance2;
+	}
+
+	public String getPhone() {
         return phone;
     }
 
@@ -199,13 +207,13 @@ public class WalletUserInfo extends BaseEntity2{
         this.accountBalance = accountBalance;
     }
 
-    public BigDecimal getProfitBalance() {
-        return profitBalance;
-    }
-
-    public void setProfitBalance(BigDecimal profitBalance) {
-        this.profitBalance = profitBalance;
-    }
+//    public BigDecimal getProfitBalance() {
+//        return profitBalance;
+//    }
+//
+//    public void setProfitBalance(BigDecimal profitBalance) {
+//        this.profitBalance = profitBalance;
+//    }
 
     public String getSettleCardNo() {
         return settleCardNo;

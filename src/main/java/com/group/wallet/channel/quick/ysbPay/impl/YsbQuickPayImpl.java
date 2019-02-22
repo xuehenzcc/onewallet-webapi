@@ -1,16 +1,21 @@
 package com.group.wallet.channel.quick.ysbPay.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.group.core.exception.ServiceException;
 import com.group.utils.HttpClientUtils;
 import com.group.utils.MD5;
 import com.group.wallet.channel.quick.QuickPay;
-import com.group.wallet.model.*;
-import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletTradeRecords;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmChannelMer;
 
 @Service
 public class YsbQuickPayImpl implements QuickPay {
@@ -18,7 +23,7 @@ public class YsbQuickPayImpl implements QuickPay {
     private final String accountId = "2120180527101423001";
 
     @Override
-    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String regisSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         //新增报件
         JSONObject jsonObject = registerCustomer(userInfo, channel, channelMer);
         String result_code = jsonObject.getString("result_code");
@@ -46,33 +51,33 @@ public class YsbQuickPayImpl implements QuickPay {
     }
 
     @Override
-    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, WalletChannel channel, WalletChannelMer channelMer) throws Exception {
+    public String updateSubMerchant(WalletUserInfo userInfo, WalletBankCard bankCard, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, WalletChannel channel, WalletChannelMer channelMer, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> quickPay(WalletUserInfo userInfo, WalletTradeRecords tradeRecords, ZzlmChannel channel, ZzlmChannelMer channelMer, WalletBankCard bankCard) throws Exception {
         h5bind(userInfo, channel, channelMer);
         return null;
     }
 
     @Override
-    public boolean checkSign(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public boolean checkSign(ZzlmChannel channel, Map<String, Object> params) throws Exception {
         return false;
     }
 
     @Override
-    public Map<String, Object> sendSMSCode(WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
+    public Map<String, Object> sendSMSCode(ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard) throws Exception {
         return null;
     }
 
     @Override
-    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, WalletChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
+    public Map<String, Object> quickPayConfirm(WalletUserInfo userInfo, ZzlmChannel channel, WalletTradeRecords tradeRecords, WalletBankCard bankCard, Map<String, Object> params) throws Exception {
         return null;
     }
 
     @Override
-    public void settlement(WalletChannel channel, Map<String, Object> params) throws Exception {
+    public void settlement(ZzlmChannel channel, Map<String, Object> params) throws Exception {
 
     }
 
@@ -83,7 +88,7 @@ public class YsbQuickPayImpl implements QuickPay {
 
 
 
-    private JSONObject registerCustomer(WalletUserInfo userInfo, WalletChannel channel, WalletChannelMer channelMer) throws Exception{
+    private JSONObject registerCustomer(WalletUserInfo userInfo, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception{
         String memberId = userInfo.getPhone();
         String name = userInfo.getRealName();
         String certType = "1";
@@ -114,7 +119,7 @@ public class YsbQuickPayImpl implements QuickPay {
     }
 
 
-    private JSONObject updateCustomer(WalletUserInfo userInfo, WalletChannel channel, WalletChannelMer channelMer) throws Exception{
+    private JSONObject updateCustomer(WalletUserInfo userInfo, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception{
         String memberId = userInfo.getPhone();
         String merchantNo = "2110000000000000019164";
         String D0FeeRate = channelMer.getDeductRate()+"";
@@ -140,7 +145,7 @@ public class YsbQuickPayImpl implements QuickPay {
         return jsonObject;
     }
 
-    private JSONObject h5bind(WalletUserInfo userInfo, WalletChannel channel, WalletChannelMer channelMer) throws Exception{
+    private JSONObject h5bind(WalletUserInfo userInfo, ZzlmChannel channel, ZzlmChannelMer channelMer) throws Exception{
         String memberId = userInfo.getPhone();
         String merchantNo = channelMer.getChannelMerNo();
         String responseUrl = "http://www.baidu.com";
@@ -160,7 +165,7 @@ public class YsbQuickPayImpl implements QuickPay {
         return jsonObject;
     }
 
-    private void h5bindInfo(WalletUserInfo userInfo, WalletChannel channel, String merchantNo) throws Exception{
+    private void h5bindInfo(WalletUserInfo userInfo, ZzlmChannel channel, String merchantNo) throws Exception{
         String cardNo = userInfo.getSettleCardNo();
         String name = userInfo.getRealName();
         String responseUrl = "http://www.baidu.com";
@@ -175,7 +180,7 @@ public class YsbQuickPayImpl implements QuickPay {
         System.out.println(result);
     }
 
-    private void checkCardInfo(WalletUserInfo userInfo, WalletChannel channel, String merchantNo) throws Exception{
+    private void checkCardInfo(WalletUserInfo userInfo, ZzlmChannel channel, String merchantNo) throws Exception{
         String name = userInfo.getRealName();
         String bankName = userInfo.getSettleBank();
         String cardNo = userInfo.getSettleCardNo();

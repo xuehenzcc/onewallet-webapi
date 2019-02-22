@@ -1,29 +1,14 @@
 package com.group.wallet.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.group.core.config.MyWebAppConfig;
-import com.group.core.enums.FileType;
-import com.group.core.exception.ServiceException;
-import com.group.core.service.QiniuyunService;
-import com.group.core.service.RongCloudService;
-import com.group.core.service.impl.PushService;
-import com.group.utils.CommonUtils;
-import com.group.utils.ImageUtils;
-import com.group.wallet.channel.authent.common.Toolkit;
-import com.group.wallet.channel.authent.service.AuthentXmlImpl;
-import com.group.wallet.channel.authent.service.TransactionClient;
-import com.group.wallet.channel.pos.lkl.impl.LklPosPayImpl;
-import com.group.wallet.mapper.*;
-import com.group.wallet.model.*;
-import com.group.wallet.model.enums.*;
-import com.group.wallet.service.CommonService;
-import com.group.wallet.service.EmaySmsService;
-import com.group.wallet.service.NoticeService;
-import com.group.wallet.service.UserCenterService;
-import com.group.wallet.util.StringReplaceUtil;
-//import com.sun.jdi.request.StepRequest;
-import com.sun.rowset.internal.Row;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +16,55 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import tk.mybatis.mapper.entity.Example;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.group.core.enums.FileType;
+import com.group.core.exception.ServiceException;
+import com.group.core.service.QiniuyunService;
+import com.group.core.service.RongCloudService;
+import com.group.core.service.impl.PushService;
+import com.group.utils.ImageUtils;
+import com.group.wallet.channel.authent.common.Toolkit;
+import com.group.wallet.channel.authent.service.AuthentXmlImpl;
+import com.group.wallet.channel.authent.service.TransactionClient;
+import com.group.wallet.channel.pos.lkl.impl.LklPosPayImpl;
+import com.group.wallet.mapper.CommonMessagesMapper;
+import com.group.wallet.mapper.WalletAccountMapper;
+import com.group.wallet.mapper.WalletAuthentRecordsMapper;
+import com.group.wallet.mapper.WalletBankCardMapper;
+import com.group.wallet.mapper.WalletBranchBankMapper;
+import com.group.wallet.mapper.WalletChannelMapper;
+import com.group.wallet.mapper.WalletCopywritingMapper;
+import com.group.wallet.mapper.WalletCustomerServiceMapper;
+import com.group.wallet.mapper.WalletDeductRateMapper;
+import com.group.wallet.mapper.WalletUpdatephoneApplyMapper;
+import com.group.wallet.mapper.WalletUserInfoMapper;
+import com.group.wallet.model.CommonMessages;
+import com.group.wallet.model.SysConfig;
+import com.group.wallet.model.WalletAccount;
+import com.group.wallet.model.WalletAuthentRecords;
+import com.group.wallet.model.WalletBankCard;
+import com.group.wallet.model.WalletBankCardExample;
+import com.group.wallet.model.WalletBranchBank;
+import com.group.wallet.model.WalletCopywritingWithBLOBs;
+import com.group.wallet.model.WalletCustomerServiceWithBLOBs;
+import com.group.wallet.model.WalletDeductRate;
+import com.group.wallet.model.WalletUpdatephoneApply;
+import com.group.wallet.model.WalletUserInfo;
+import com.group.wallet.model.enums.AuthType;
+import com.group.wallet.model.enums.ChannelType;
+import com.group.wallet.model.enums.DeductType;
+import com.group.wallet.model.enums.MessageType;
+import com.group.wallet.model.enums.UserState;
+import com.group.wallet.model.enums.UserType;
+import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.service.CommonService;
+import com.group.wallet.service.EmaySmsService;
+import com.group.wallet.service.UserCenterService;
+import com.group.wallet.util.StringReplaceUtil;
+
+import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class UserCenterServiceImpl implements UserCenterService {
@@ -176,7 +205,7 @@ public class UserCenterServiceImpl implements UserCenterService {
     public JSONObject getLklUserInfo(Long userId) throws Exception{
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
 
-        WalletChannel channel = new WalletChannel();
+        ZzlmChannel channel = new ZzlmChannel();
         channel.setNumber("LKL");
         channel = walletChannelMapper.selectOne(channel);
 
