@@ -1,14 +1,15 @@
 package com.group.wallet.service.impl;
 
-import com.group.wallet.mapper.WalletChannelMapper;
-import com.group.wallet.mapper.WalletDeductRateMapper;
-import com.group.wallet.model.WalletDeductRate;
-import com.group.wallet.model.enums.DeductType;
-import com.group.wallet.service.ChannelService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.group.wallet.mapper.WalletChannelMapper;
+import com.group.wallet.mapper.WalletDeductRateMapper;
+import com.group.wallet.model.enums.DeductType;
+import com.group.wallet.model.zzlm.ZzlmDeductRate;
+import com.group.wallet.service.ChannelService;
 
 @Service
 public class ChannelServiceImpl implements ChannelService {
@@ -19,11 +20,11 @@ public class ChannelServiceImpl implements ChannelService {
     private WalletDeductRateMapper walletDeductRateMapper;
 
     @Override
-    public WalletDeductRate getChannelRate(Long channelId) {
-        WalletDeductRate deductRate = new WalletDeductRate();
+    public ZzlmDeductRate getChannelRate(Long channelId) {
+        ZzlmDeductRate deductRate = new ZzlmDeductRate();
         deductRate.setDeductType(DeductType.通道.getValue());
         deductRate.setChannelId(channelId);
-        List<WalletDeductRate> list = walletDeductRateMapper.select(deductRate);
+        List<ZzlmDeductRate> list = walletDeductRateMapper.select(deductRate);
         if(list.size()>0){
             return list.get(0);
         }

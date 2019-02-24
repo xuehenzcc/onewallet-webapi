@@ -61,7 +61,7 @@ public class HomeController extends BaseController {
     public void test(HttpServletRequest request,HttpServletResponse response){
 //    	homeService.test();
     	try {
-			homeService.getCompPos();
+			homeService.getUserRelation(null,null,null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -359,6 +359,7 @@ public class HomeController extends BaseController {
         ShopOrder orderVO=new ShopOrder();
         orderVO.setOrderNum("Z"+orderNumber);//订单编号
         orderVO.setState("1");//待支付
+        orderVO.setShopType(shop.getType());//商品类型0展业123
         orderVO.setShopId(Long.valueOf(shopId));
         orderVO.setUserId(Long.valueOf(userId));
         orderVO.setTotalPrice(totalPrice);

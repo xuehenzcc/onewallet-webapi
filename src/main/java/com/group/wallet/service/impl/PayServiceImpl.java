@@ -34,7 +34,6 @@ import com.group.wallet.mapper.WalletSubCardMapper;
 import com.group.wallet.mapper.WalletTradeRecordsMapper;
 import com.group.wallet.mapper.WalletUserInfoMapper;
 import com.group.wallet.model.WalletBankCard;
-import com.group.wallet.model.WalletDeductRate;
 import com.group.wallet.model.WalletTradeRecords;
 import com.group.wallet.model.WalletUserInfo;
 import com.group.wallet.model.enums.ChannelMerType;
@@ -45,6 +44,7 @@ import com.group.wallet.model.enums.TradeState;
 import com.group.wallet.model.enums.UserState;
 import com.group.wallet.model.zzlm.ZzlmChannel;
 import com.group.wallet.model.zzlm.ZzlmChannelMer;
+import com.group.wallet.model.zzlm.ZzlmDeductRate;
 import com.group.wallet.service.PayService;
 import com.group.wallet.service.SettleService;
 
@@ -91,11 +91,11 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public void payCheck(Long channelId, String settleType, BigDecimal amount, Long userId) {
-        WalletDeductRate deductRate = new WalletDeductRate();
+        ZzlmDeductRate deductRate = new ZzlmDeductRate();
         deductRate.setDeductType(DeductType.通道.getValue());
         deductRate.setChannelId(channelId);
         deductRate.setSettleType(settleType);
-        List<WalletDeductRate> deductRates = walletDeductRateMapper.select(deductRate);
+        List<ZzlmDeductRate> deductRates = walletDeductRateMapper.select(deductRate);
         if(deductRates==null || deductRates.size()==0){
             throw new ServiceException("2000", "获取不到通道汇率");
         }

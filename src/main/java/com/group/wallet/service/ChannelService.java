@@ -1,8 +1,6 @@
 package com.group.wallet.service;
 
-import com.group.wallet.model.WalletDeductRate;
-
-import java.util.List;
+import com.group.wallet.model.zzlm.ZzlmDeductRate;
 
 /**
  * 通道Service
@@ -14,7 +12,7 @@ public interface ChannelService {
      * @param channelId
      * @return
      */
-    WalletDeductRate getChannelRate(Long channelId);
+    ZzlmDeductRate getChannelRate(Long channelId);
 
     
 }

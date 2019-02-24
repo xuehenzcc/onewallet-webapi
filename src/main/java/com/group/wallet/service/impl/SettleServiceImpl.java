@@ -25,7 +25,6 @@ import com.group.wallet.mapper.WalletDeductRateMapper;
 import com.group.wallet.mapper.WalletIncomeRecordsMapper;
 import com.group.wallet.mapper.WalletUserInfoMapper;
 import com.group.wallet.model.CommonMessages;
-import com.group.wallet.model.WalletDeductRate;
 import com.group.wallet.model.WalletTradeRecords;
 import com.group.wallet.model.WalletUpgradeOrder;
 import com.group.wallet.model.WalletUserInfo;
@@ -38,6 +37,7 @@ import com.group.wallet.model.enums.UserState;
 import com.group.wallet.model.enums.UserType;
 import com.group.wallet.model.zzlm.ZzlmAdvance;
 import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmDeductRate;
 import com.group.wallet.model.zzlm.ZzlmIncomeRecords;
 import com.group.wallet.service.SettleService;
 import com.group.wallet.service.WalletService;
@@ -364,13 +364,13 @@ public class SettleServiceImpl implements SettleService {
         if(channelId==null || StringUtils.isEmpty(userType) || StringUtils.isEmpty(settleType))
             return map;
 
-        WalletDeductRate deductRate = new WalletDeductRate();
+        ZzlmDeductRate deductRate = new ZzlmDeductRate();
         deductRate.setDeductType(DeductType.商户.getValue());
         deductRate.setChannelId(channelId);
         deductRate.setUserType(userType);
         deductRate.setSettleType(settleType);
 
-        List<WalletDeductRate> deductRates = walletDeductRateMapper.select(deductRate);
+        List<ZzlmDeductRate> deductRates = walletDeductRateMapper.select(deductRate);
         if(deductRates!=null && deductRates.size()>0){
             deductRate = deductRates.get(0);
             BigDecimal rate = deductRate.getDeductRate()==null?BigDecimal.ZERO:deductRate.getDeductRate();

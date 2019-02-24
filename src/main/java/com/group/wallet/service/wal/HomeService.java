@@ -269,32 +269,10 @@ public class HomeService {
 	//创建分润记录（待开发：余额变动）
 	@Transactional
 	public void updateReachData(Pos pos) throws Exception{
-//		List<Account> accountList=new ArrayList<Account>();
-//		for (int i = 0; i < activePosList.size(); i++) {
-//			Pos pos=activePosList.get(i);
-			String type=pos.getType();
-//			Account account=new Account();
-//			account.setApp("2");
-//			account.setAmount(pos.getAmt());
-//			account.setPosType(pos.getType());
-//			account.setUserId(pos.getUserId());
-//			account.setUserName("退还保证金");
-//			account.setSn(pos.getSn());
-//			accountList.add(account);
-			if("3".equals(type)){//小POS（返激活保证金+返现）
-				updateCalculateResult(IncomeType.激活返现, "退还保证金",pos.getUserId(),pos.getAmt(),pos.getSn());
-//				Account acc=new Account();
-//				acc.setApp("2");
-//				acc.setAmount(pos.getBackAmt());//小POS激活返现
-//				acc.setPosType(pos.getType());
-//				acc.setUserId(pos.getUserId());
-//				acc.setUserName("激活返现");
-//				acc.setSn(pos.getSn());
-//				accountList.add(acc);
-				updateCalculateResult(IncomeType.激活返现, "激活返现",pos.getUserId(),pos.getBackAmt(),pos.getSn());
-			}
-//		}
-//		homeMapper.addAccountList(accountList);
+		String type=pos.getType();
+		if("3".equals(type)){//小POS（返激活保证金+返现）
+			updateCalculateResult(pos.getUserId(),IncomeType.激活返现, "激活返现",pos.getUserId(),pos.getBackAmt(),pos.getSn());
+		}
 		homeMapper.updatePos(pos);
 	}
 	
@@ -368,48 +346,52 @@ public class HomeService {
 	
 	/**
 	 * 获取用户层级关系--分别进行激活返现
-	 * @param incomeType 激活返现("A8"),盟友激活返现("A9"),退还保证金("A10"), 购买pos机("B2")
-	 * @param account
-	 * @param incomeName
+	 * @param incomeType 激活奖励上级("A8"),退还保证金("A10"), 购买pos机("B2")
+	 * @param amt pos数量，1个奖励5元，5元，20元。
+	 * @param sn 订单编号
+	 * @param userId 用户ID
 	 * @throws Exception 
 	 */
 	@Transactional
 	public void getUserRelation(Long userId,BigDecimal amt,String sn) throws Exception{
 //		amt=amt.divide(BigDecimal.valueOf(3),2);//均分三份
+//		A8,178659,1,Z19022319101488
 		ParamVO param=new ParamVO();
 		param.setNumber("101");
 		List<ParamVO> paramList=homeMapper.getParam(param);
 		String paramstr=paramList.get(0).getParam();
 		String [] params=paramstr.split(",");
-		BigDecimal zhitui=BigDecimal.valueOf(Long.valueOf(params[0]));//直接 推荐 人 
-		BigDecimal jiantui=BigDecimal.valueOf(Long.valueOf(params[1]));//间接推荐人 
-		BigDecimal hehuoren=BigDecimal.valueOf(Long.valueOf(params[2]));//最近 超级合伙人
-//		updateCalculateResult(IncomeType.激活返现, "激活返现", userId, amt, sn);//返现本人
+		BigDecimal zhitui=BigDecimal.valueOf(Long.valueOf(params[0])).multiply(amt);//直接 推荐 人 
+		BigDecimal jiantui=BigDecimal.valueOf(Long.valueOf(params[1])).multiply(amt);//间接推荐人 
+		BigDecimal hehuoren=BigDecimal.valueOf(Long.valueOf(params[2])).multiply(amt);//最近 超级合伙人
 		WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
 		int num=0;
 		while(true) {
 			num++;
 			Long uid=userInfo.getRecommonId();//推荐人ID
+			if(null==uid){
+				break;
+			}
 			userInfo = walletUserInfoMapper.selectByPrimaryKey(uid);
 			String userType=userInfo.getUserType();
-			if(null==uid){
+			if(null==userType || "".equals(userType)){
 				break;
 			}else{
 				if(num==1){
 					if("F".equals(userType)){//超级合伙人
-						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, hehuoren, sn);//下级返现本人
+						updateCalculateResult(userId,IncomeType.激活返现, "盟友激活返现", uid, hehuoren, sn);//下级返现本人
 						break;
 					}else{//直推
-						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, zhitui, sn);//直推
+						updateCalculateResult(userId,IncomeType.激活返现, "盟友激活返现", uid, zhitui, sn);//直推
 					}
 				}else{
 					if("F".equals(userType)){//超级合伙人
 						//TODO
-						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, hehuoren, sn);//超级合伙人
+						updateCalculateResult(userId,IncomeType.激活返现, "盟友激活返现", uid, hehuoren, sn);//超级合伙人
 						break;
 					}
 					if(num==2){//间接推荐人 
-						updateCalculateResult(IncomeType.激活返现, "盟友激活返现", uid, jiantui, sn);//间接推荐人 
+						updateCalculateResult(userId,IncomeType.激活返现, "盟友激活返现", uid, jiantui, sn);//间接推荐人 
 					}
 				}
 			}
@@ -424,7 +406,7 @@ public class HomeService {
 	 * @throws Exception 
 	 */
 	@Transactional
-	public void updateCalculateResult(IncomeType incomeType,String incomeName,Long userId,BigDecimal amt,String sn) throws Exception{
+	public void updateCalculateResult(Long fromUserId,IncomeType incomeType,String incomeName,Long userId,BigDecimal amt,String sn) throws Exception{
 		WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
 		BigDecimal profitBalance = userInfo.getProfitBalance2()==null?BigDecimal.ZERO:userInfo.getProfitBalance2();//用户剩余分润金额
         BigDecimal profitBalance2 = null;
@@ -440,6 +422,7 @@ public class HomeService {
         incomeRecords.setOrderNum(sn);
         incomeRecords.setType(incomeType.getValue());
         incomeRecords.setAmount(amt);//分润/提现金额
+        incomeRecords.setFromUserId(fromUserId);//分润来源用户ID 
         incomeRecords.setPristineAmount(profitBalance);//原始金额
         incomeRecords.setSurplusAmount(profitBalance2);//剩余金额
         incomeRecords.setState(IncomeRecordsState.已到账.getValue());

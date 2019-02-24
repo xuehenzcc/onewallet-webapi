@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import tk.mybatis.mapper.entity.Example;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.group.core.enums.FileType;
@@ -49,7 +51,6 @@ import com.group.wallet.model.WalletBankCardExample;
 import com.group.wallet.model.WalletBranchBank;
 import com.group.wallet.model.WalletCopywritingWithBLOBs;
 import com.group.wallet.model.WalletCustomerServiceWithBLOBs;
-import com.group.wallet.model.WalletDeductRate;
 import com.group.wallet.model.WalletUpdatephoneApply;
 import com.group.wallet.model.WalletUserInfo;
 import com.group.wallet.model.enums.AuthType;
@@ -59,12 +60,11 @@ import com.group.wallet.model.enums.MessageType;
 import com.group.wallet.model.enums.UserState;
 import com.group.wallet.model.enums.UserType;
 import com.group.wallet.model.zzlm.ZzlmChannel;
+import com.group.wallet.model.zzlm.ZzlmDeductRate;
 import com.group.wallet.service.CommonService;
 import com.group.wallet.service.EmaySmsService;
 import com.group.wallet.service.UserCenterService;
 import com.group.wallet.util.StringReplaceUtil;
-
-import tk.mybatis.mapper.entity.Example;
 
 @Service
 public class UserCenterServiceImpl implements UserCenterService {
@@ -852,11 +852,11 @@ public class UserCenterServiceImpl implements UserCenterService {
 
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
 
-        WalletDeductRate deductRate = new WalletDeductRate();
+        ZzlmDeductRate deductRate = new ZzlmDeductRate();
         deductRate.setDeductType(DeductType.通道.getValue());
         deductRate.setChannelId(channelId);
         deductRate.setUserType(userInfo.getUserType());
-        List<WalletDeductRate> list = walletDeductRateMapper.select(deductRate);
+        List<ZzlmDeductRate> list = walletDeductRateMapper.select(deductRate);
 
         //扣除手续费和提现费，按照剩余金额代付
 
@@ -865,9 +865,9 @@ public class UserCenterServiceImpl implements UserCenterService {
     @Override
     public List<Map<String, Object>> getMyRate(String userType, String payWay) {
         List<String> channelType = new ArrayList<>();
-        channelType.add(ChannelType.快捷渠道.getValue());
-        channelType.add(ChannelType.H5快捷渠道.getValue());
-        channelType.add(ChannelType.刷卡渠道.getValue());
+        channelType.add(ChannelType.快捷渠道.getValue());//Q1
+        channelType.add(ChannelType.H5快捷渠道.getValue());//Q2
+        channelType.add(ChannelType.刷卡渠道.getValue());//S
         List<Map<String, Object>> list = walletDeductRateMapper.selectUserChannelRate(userType, channelType);
         return list;
     }

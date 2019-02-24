@@ -1,16 +1,13 @@
 package com.group.wallet.controller;
 
-import com.group.core.annotation.ActionAnnotation;
-import com.group.core.commons.SysCode;
-import com.group.core.config.MyWebAppConfig;
-import com.group.core.controller.BaseController;
-import com.group.utils.ResponseUtils;
-import com.group.utils.SignUtils;
-import com.group.wallet.model.WalletBankCard;
-import com.group.wallet.model.WalletDeductRate;
-import com.group.wallet.model.WalletTradeRecords;
-import com.group.wallet.service.OrderService;
-import com.group.wallet.service.PayService;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,12 +15,14 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.group.core.annotation.ActionAnnotation;
+import com.group.core.commons.SysCode;
+import com.group.core.config.MyWebAppConfig;
+import com.group.core.controller.BaseController;
+import com.group.utils.SignUtils;
+import com.group.wallet.model.zzlm.ZzlmDeductRate;
+import com.group.wallet.service.OrderService;
+import com.group.wallet.service.PayService;
 
 /**
  * 支付
@@ -57,7 +56,7 @@ public class PayController extends BaseController {
         Map<Class<?>, String[]> includes = new HashMap<Class<?>, String[]>() {
             private static final long serialVersionUID = -5349178483472578926L;
             {
-                put(WalletDeductRate.class, new String[] {"id","channelId","channelName","channelType","remarks","settleType","deductRate","poundage","limitMin","limitMax","dayMax"});
+                put(ZzlmDeductRate.class, new String[] {"id","channelId","channelName","channelType","remarks","settleType","deductRate","poundage","limitMin","limitMax","dayMax"});
             }
         };
         renderJson(request, response, SysCode.SUCCESS, list, includes);

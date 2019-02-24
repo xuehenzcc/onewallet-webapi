@@ -38,6 +38,7 @@ public class ShopOrder {
 	private Integer count;
 	private BigDecimal totalPrice;
 	private String state;
+	private String shopType;//商品类型（0展业1大pos2智能pos3小pos）
 	private String payWay;
 	private Date payTime;
 	private String expressCompany;//快递公司
@@ -48,6 +49,12 @@ public class ShopOrder {
 	private Date createTime;
 	
 	
+	public String getShopType() {
+		return shopType;
+	}
+	public void setShopType(String shopType) {
+		this.shopType = shopType;
+	}
 	public String getShopImage() {
 		return shopImage;
 	}

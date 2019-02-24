@@ -14,6 +14,7 @@ import com.group.wallet.service.NoticeService;
 import com.group.wallet.service.OrderService;
 import com.group.wallet.service.PayService;
 import com.group.wallet.service.wal.HomeService;
+import com.group.wallet.util.mq.JmsUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -58,7 +59,8 @@ public class PayController2 extends BaseController{
 	private CommonService commonService;
 	@Autowired
 	private HomeService homeService;
-	
+	@Autowired
+	private JmsUtil jmsUtil;
 	/**
 	 * 支付宝支付
 	 * @param req
@@ -75,7 +77,7 @@ public class PayController2 extends BaseController{
         Assert.hasLength(outTradeNo, "订单号不能为空");
 		Assert.hasLength(payWay, "付款方式不能为空");
 
-		SysConfig sysConfig = commonService.getConfigValue("onewallet_api_url");
+		SysConfig sysConfig = commonService.getConfigValue("zzlm_api_url");
 		String apiUrl = sysConfig.getConfigvalue();
 
 		String productName = "";
@@ -157,6 +159,13 @@ public class PayController2 extends BaseController{
 					order.setOrderNum(out_trade_no);
 					System.out.println("支付宝支付成功通知：out_trade_no="+out_trade_no);
 					homeService.updateOrderByPay(order);
+					List<ShopOrder> orderList=homeService.getShopOrderList(order);
+					//异步奖励推荐人
+					if(!"0".equals(order.getShopType()) && orderList.size()>0){//非展业商品
+						String msg="A8,"+orderList.get(0).getUserId()+","+orderList.get(0).getCount()+","+order.getOrderNum();
+						jmsUtil.send(msg);//分发推荐奖励 
+						System.out.println("购买pos,触发推荐人返利···消息");
+					}
 				}
 				
 				logger.info("支付宝通知成功,后台处理结果为：SUCCESS");

@@ -95,13 +95,13 @@
  <!-- 创建订单 -->
  <insert id="addShopOrder" useGeneratedKeys="true" keyProperty="id">
  	INSERT INTO wallet_shop_order_zcc 
-	(order_num,user_id,shop_id,shop_name,shop_image,unit_price,COUNT,total_price,state,receive_man,link_tel,receive_address,create_time)
-	VALUES (#{orderNum},#{userId},#{shopId},#{shopName},#{shopImage},#{unitPrice},#{count},#{totalPrice},#{state},#{receiveMan},#{linkTel},#{receiveAddress},now())
+	(order_num,user_id,shop_id,shop_name,shop_image,shop_type,unit_price,COUNT,total_price,state,receive_man,link_tel,receive_address,create_time)
+	VALUES (#{orderNum},#{userId},#{shopId},#{shopName},#{shopImage},#{shopType},#{unitPrice},#{count},#{totalPrice},#{state},#{receiveMan},#{linkTel},#{receiveAddress},now())
  </insert> 
  <!-- 获取订单列表 -->
  <select id="getShopOrderList" resultType="com.group.wallet.model.vo.ShopOrder">
  	SELECT id,order_num AS orderNum,user_id AS userId,shop_id as shopId,shop_image as shopImage,shop_name as shopName,unit_price AS unitPrice,COUNT,total_price AS totalPrice,state,pay_way AS payWay,
- 		pay_time AS payTime,express_company AS expressCompany,express_number AS expressNumber,
+ 		pay_time AS payTime,express_company AS expressCompany,express_number AS expressNumber,shop_type as shopType,
 		receive_man AS receiveMan,link_tel AS linkTel,receive_address AS receiveAddress,create_time AS createTime
 	FROM wallet_shop_order_zcc
  	<where>
@@ -360,7 +360,7 @@
  <!-- 获取 收益 列表 -->
  <select id="getImcomeList2" resultType="com.group.wallet.model.vo.Account">
  		 SELECT user_id AS userId,order_num as sn,channel_order_num as posType,amount,descp AS userName,create_time AS createTime 
- 		 FROM wallet_income_records
+ 		 FROM zzlm_income_records
 		 <where>
 	 		<if test="userId !=null">
 	 			<![CDATA[
@@ -378,7 +378,7 @@
  </select>
  <select id="getImcomeList3" resultType="com.group.wallet.model.vo.Account">
  		 SELECT user_id AS userId,order_num as sn,channel_order_num as posType,amount,descp AS userName,create_time AS createTime 
- 		 FROM wallet_income_records
+ 		 FROM zzlm_income_records
 		 <where>
 	 		<if test="userId !=null">
 	 			and user_id = #{userId}
@@ -418,7 +418,7 @@
   </insert> 
   <!-- 创建收益记录 -->
   <insert id="addIncome">
- 		INSERT INTO wallet_income_records 
+ 		INSERT INTO zzlm_income_records 
 		(user_id,order_num,channel_order_num,TYPE,amount,pristine_amount,surplus_amount,state,descp,create_time)
 		VALUES (#{userId},#{orderNum},(SELECT TYPE FROM wallet_pos_zcc WHERE sn=#{orderNum}),
 			#{type},#{amount},#{pristineAmount},#{surplusAmount},#{state},#{descp},now())

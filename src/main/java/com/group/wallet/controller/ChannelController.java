@@ -1,21 +1,22 @@
 package com.group.wallet.controller;
 
-import com.group.core.annotation.ActionAnnotation;
-import com.group.core.commons.SysCode;
-import com.group.core.controller.BaseController;
-import com.group.wallet.channel.quick.yibaoPay.impl.YibaoQuickPayImpl;
-import com.group.wallet.model.WalletDeductRate;
-import com.group.wallet.model.WalletUserInfo;
-import com.group.wallet.service.ChannelService;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
+import com.group.core.annotation.ActionAnnotation;
+import com.group.core.commons.SysCode;
+import com.group.core.controller.BaseController;
+import com.group.wallet.channel.quick.yibaoPay.impl.YibaoQuickPayImpl;
+import com.group.wallet.model.zzlm.ZzlmDeductRate;
+import com.group.wallet.service.ChannelService;
 
 /**
  * 通道
@@ -43,11 +44,11 @@ public class ChannelController extends BaseController {
         String channelId = params.get("channelId");
         Assert.hasLength(channelId, "channelId不能为空");
 
-        WalletDeductRate result = channelService.getChannelRate(Long.parseLong(channelId));
+        ZzlmDeductRate result = channelService.getChannelRate(Long.parseLong(channelId));
         Map<Class<?>, String[]> includes = new HashMap<Class<?>, String[]>() {
             private static final long serialVersionUID = -5349178483472578926L;
             {
-                put(WalletDeductRate.class, new String[] {"id","deductRate","poundage","limitMin","limitMax","dayMax"});
+                put(ZzlmDeductRate.class, new String[] {"id","deductRate","poundage","limitMin","limitMax","dayMax"});
             }
         };
         renderJson(request, response, SysCode.SUCCESS, result, includes);
