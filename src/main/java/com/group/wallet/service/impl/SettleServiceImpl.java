@@ -92,7 +92,7 @@ public class SettleServiceImpl implements SettleService {
         if(ChannelType.刷卡渠道.getValue().equals(channelType)){
             incomeType = IncomeType.刷卡收益;
             //刷卡渠道补分润
-            calculateLKLProfit(userInfo, rate, realTradeMoney, orderNum);
+//            calculateLKLProfit(userInfo, rate, realTradeMoney, orderNum);
         }else {
             incomeType = IncomeType.快捷分润;
         }
@@ -146,7 +146,8 @@ public class SettleServiceImpl implements SettleService {
         if(rate2==null || rate2.compareTo(BigDecimal.ZERO)<=0)
             return;
 
-        if(baseRate.compareTo(rate2)>0){
+        String state=userInfo.getState();//用户状态 2（审核通过）才可以有分润。
+        if(baseRate.compareTo(rate2)>0 && "2".equals(state)){
             BigDecimal balanceRate = baseRate.subtract(rate2);
             if(balanceRate.compareTo(BigDecimal.ZERO)>0){
                 BigDecimal balanceMoney = balanceRate.multiply(realTradeMoney).multiply(new BigDecimal("0.01"));
@@ -180,7 +181,7 @@ public class SettleServiceImpl implements SettleService {
                 String userType1 = UserType.getEnumName(sourceUser.getUserType());
 
                 String desc = realNmae + " " + phone + " " + userType1;
-                BigDecimal money = realTradeMoney.multiply(new BigDecimal("0.0001"));
+                BigDecimal money = realTradeMoney.multiply(new BigDecimal("0.00005"));//原来万分之一,现在万分之零点五
                 updateProfit(userInfo, money, IncomeType.直推返点, orderNum, sourceUser, desc);
                 return;
             }
