@@ -241,7 +241,7 @@ public class HomeService {
 			data.setSn(sn);
 			data.setEndTime(DateUtil.formatDate(endDate, "yyyy-MM-dd HH:mm:ss"));
 			List<BusinessData> businessList=homeMapper.getBusinessDataList(data);
-			if(businessList!=null && businessList.size()>0){
+			if(businessList!=null && businessList.size()>0 && compAmt.intValue()>0){
 				for (int j = 0; j < businessList.size(); j++) {
 					data=businessList.get(j);
 					BigDecimal amt=data.getAmt();
