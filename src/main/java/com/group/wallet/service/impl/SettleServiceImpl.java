@@ -75,6 +75,9 @@ public class SettleServiceImpl implements SettleService {
         Long channelId = tradeRecords.getChannelId();//通道id
         String settleType = tradeRecords.getSettleType();//结算类型 t0，t1
         Long userId = tradeRecords.getUserId();//用户id
+        String batch=tradeRecords.getBatch();
+        Date businessTime=tradeRecords.getBusinessTime();
+        
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
         if(userInfo==null)
             return;
@@ -102,10 +105,10 @@ public class SettleServiceImpl implements SettleService {
         String userType1 = UserType.getEnumName(userInfo.getUserType());
         String desc = realNmae + " " + phone + " " + userType1;
         //计算交易分润
-        calculateChannelProfit(desc,recommonId, rate, rate, realTradeMoney, incomeType, orderNum, userInfo, channelId, settleType, new ArrayList<Long>());
+        calculateChannelProfit(desc,recommonId, rate, rate, realTradeMoney, incomeType, orderNum,batch,businessTime, userInfo, channelId, settleType, new ArrayList<Long>());
 
         //计算直推返点
-        calculateRecommenProfit(recommonId, realTradeMoney, 0, orderNum, userInfo);
+        calculateRecommenProfit(recommonId, realTradeMoney, 0, orderNum,batch,businessTime, userInfo);
     }
 
     @Override
@@ -131,7 +134,8 @@ public class SettleServiceImpl implements SettleService {
      * @param realTradeMoney 实际交易金额
      * @param incomeType
      */
-    private void calculateChannelProfit(String desc,Long userId, BigDecimal baseRate, BigDecimal rate, BigDecimal realTradeMoney, IncomeType incomeType, String orderNum, WalletUserInfo sourceUser, Long channelId, String settleType, List<Long> userIds){
+    private void calculateChannelProfit(String desc,Long userId, BigDecimal baseRate, BigDecimal rate, 
+    		BigDecimal realTradeMoney, IncomeType incomeType, String orderNum,String batch,Date businessTime, WalletUserInfo sourceUser, Long channelId, String settleType, List<Long> userIds){
         //如果计算过就退出
         if(userIds.contains(userId))
             return;
@@ -151,7 +155,7 @@ public class SettleServiceImpl implements SettleService {
             BigDecimal balanceRate = baseRate.subtract(rate2);
             if(balanceRate.compareTo(BigDecimal.ZERO)>0){
                 BigDecimal balanceMoney = balanceRate.multiply(realTradeMoney).multiply(new BigDecimal("0.01"));
-                updateProfit(userInfo, balanceMoney, incomeType, orderNum, sourceUser, desc);
+                updateProfit(userInfo, balanceMoney, incomeType, orderNum,batch,businessTime, sourceUser, desc);
                 userIds.add(userId);
             }
 
@@ -159,7 +163,7 @@ public class SettleServiceImpl implements SettleService {
         }
 
         Long recommonId = userInfo.getRecommonId();
-        calculateChannelProfit(desc,recommonId, baseRate, rate2, realTradeMoney, incomeType, orderNum, sourceUser, channelId, settleType, userIds);
+        calculateChannelProfit(desc,recommonId, baseRate, rate2, realTradeMoney, incomeType, orderNum,batch,businessTime, sourceUser, channelId, settleType, userIds);
     }
 
     /**
@@ -167,7 +171,7 @@ public class SettleServiceImpl implements SettleService {
      * @param userId
      * @param realTradeMoney
      */
-    private void calculateRecommenProfit(Long userId, BigDecimal realTradeMoney, int level, String orderNum, WalletUserInfo sourceUser){
+    private void calculateRecommenProfit(Long userId, BigDecimal realTradeMoney, int level, String orderNum, String batch,Date businessTime,WalletUserInfo sourceUser){
         WalletUserInfo userInfo = walletUserInfoMapper.selectByPrimaryKey(userId);
         if(userInfo==null)
             return;
@@ -182,13 +186,13 @@ public class SettleServiceImpl implements SettleService {
 
                 String desc = realNmae + " " + phone + " " + userType1;
                 BigDecimal money = realTradeMoney.multiply(new BigDecimal("0.00005"));//原来万分之一,现在万分之零点五
-                updateProfit(userInfo, money, IncomeType.直推返点, orderNum, sourceUser, desc);
+                updateProfit(userInfo, money, IncomeType.直推返点, orderNum,batch,businessTime, sourceUser, desc);
                 return;
             }
         }
 
         Long recommenId = userInfo.getRecommonId();
-        calculateRecommenProfit(recommenId, realTradeMoney, level, orderNum, sourceUser);
+        calculateRecommenProfit(recommenId, realTradeMoney, level, orderNum,batch,businessTime, sourceUser);
     }
 
     /**
@@ -211,11 +215,11 @@ public class SettleServiceImpl implements SettleService {
                 level1++;
                 if(level1==1){
                     BigDecimal money = orderMoney.multiply(new BigDecimal("0.3"));
-                    updateProfit(userInfo, money, IncomeType.升级收益, orderNum, sourceUser, desc);
+                    updateProfit(userInfo, money, IncomeType.升级收益, orderNum,"",null, sourceUser, desc);
                 }
             }else {
                 BigDecimal money = orderMoney.multiply(new BigDecimal("0.2"));
-                updateProfit(userInfo, money, IncomeType.升级收益, orderNum, sourceUser, desc);
+                updateProfit(userInfo, money, IncomeType.升级收益, orderNum,"",null, sourceUser, desc);
             }
         }
         else if(level==2){
@@ -223,11 +227,11 @@ public class SettleServiceImpl implements SettleService {
                 level1++;
                 if(level1==1){
                     BigDecimal money = orderMoney.multiply(new BigDecimal("0.3"));
-                    updateProfit(userInfo, money, IncomeType.升级收益, orderNum, sourceUser, desc);
+                    updateProfit(userInfo, money, IncomeType.升级收益, orderNum,"",null, sourceUser, desc);
                 }
             }else {
                 BigDecimal money = orderMoney.multiply(new BigDecimal("0.1"));
-                updateProfit(userInfo, money, IncomeType.升级收益, orderNum, sourceUser, desc);
+                updateProfit(userInfo, money, IncomeType.升级收益, orderNum,"",null, sourceUser, desc);
             }
         }
         else {
@@ -235,7 +239,7 @@ public class SettleServiceImpl implements SettleService {
                 level1++;
                 if(level1==1){
                     BigDecimal money = orderMoney.multiply(new BigDecimal("0.3"));
-                    updateProfit(userInfo, money, IncomeType.升级收益, orderNum, sourceUser, desc);
+                    updateProfit(userInfo, money, IncomeType.升级收益, orderNum,"",null, sourceUser, desc);
                 }
             }
         }
@@ -262,7 +266,7 @@ public class SettleServiceImpl implements SettleService {
         BigDecimal balanceRate = rate2.subtract(rate);
         if(balanceRate.compareTo(BigDecimal.ZERO)>0){
             BigDecimal balanceMoney = balanceRate.multiply(realTradeMoney).multiply(new BigDecimal("0.01"));
-            updateProfit(userInfo, balanceMoney, IncomeType.刷卡收益, orderNum, userInfo, desc);
+            updateProfit(userInfo, balanceMoney, IncomeType.刷卡收益, orderNum,"",null, userInfo, desc);
         }
     }
 
@@ -275,7 +279,8 @@ public class SettleServiceImpl implements SettleService {
      * @param sourceUser
      */
     @Override
-    public void updateProfit(WalletUserInfo userInfo, BigDecimal profitMoney, IncomeType incomeType, String orderNum, WalletUserInfo sourceUser, String desc){
+    public void updateProfit(WalletUserInfo userInfo, BigDecimal profitMoney, IncomeType incomeType, 
+    		String orderNum,String batch,Date businessTime, WalletUserInfo sourceUser, String desc){
         logger.info("===更新分润："+profitMoney+"===");
 
         String[] states = {UserState.已认证储蓄卡.getValue(), UserState.待审核.getValue(), UserState.已开通.getValue() };
@@ -315,6 +320,8 @@ public class SettleServiceImpl implements SettleService {
         incomeRecords.setSurplusAmount(profitBalance2);//剩余金额
         incomeRecords.setState(IncomeRecordsState.已到账.getValue());
         incomeRecords.setDescp(desc);
+        incomeRecords.setBatch(batch);//上传交易批次号 
+        incomeRecords.setBusinessTime(businessTime);//交易时间
         incomeRecords.setCreateTime(new Date());
         walletIncomeRecordsMapper.insertSelective(incomeRecords);
 

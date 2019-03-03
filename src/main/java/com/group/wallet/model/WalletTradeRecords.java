@@ -112,9 +112,29 @@ public class WalletTradeRecords extends BaseEntity2{
     private String tradeAddress;
 
     private String remarks;
+    
+    private String batch;//批次号
+    private Date businessTime;//交易时间
 
+    
+    
+    public String getBatch() {
+		return batch;
+	}
 
-    public String getOrderNo() {
+	public void setBatch(String batch) {
+		this.batch = batch;
+	}
+
+	public Date getBusinessTime() {
+		return businessTime;
+	}
+
+	public void setBusinessTime(Date businessTime) {
+		this.businessTime = businessTime;
+	}
+
+	public String getOrderNo() {
         return orderNo;
     }
 

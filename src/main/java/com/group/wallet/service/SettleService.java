@@ -7,6 +7,7 @@ import com.group.wallet.model.enums.ChannelType;
 import com.group.wallet.model.enums.IncomeType;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ public interface SettleService {
      * @param orderNum
      * @param sourceUser
      */
-    void updateProfit(WalletUserInfo userInfo, BigDecimal profitMoney, IncomeType incomeType, String orderNum, WalletUserInfo sourceUser, String desc);
+    void updateProfit(WalletUserInfo userInfo, BigDecimal profitMoney, IncomeType incomeType, String orderNum,String batch,Date businessTime, WalletUserInfo sourceUser, String desc);
 
     /**
      * 升级分润

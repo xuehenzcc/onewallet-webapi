@@ -290,7 +290,8 @@ public class HomeService {
 //		record.setRate(BigDecimal.valueOf(0.6));
 		record.setSettleType("T0");
 		record.setOrderNo(business.getSn());//sn
-		
+		record.setBatch(business.getId().toString());
+		record.setBusinessTime(business.getBusinessTime());
 		String payID=business.getRemark();
 		if("".equals(payID) || null==payID){
 			List<ChannelVO> channels=homeMapper.getChannelList(null);

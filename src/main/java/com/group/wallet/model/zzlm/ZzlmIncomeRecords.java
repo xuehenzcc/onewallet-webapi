@@ -51,11 +51,29 @@ public class ZzlmIncomeRecords extends BaseEntity2{
 
     //备注
     private String descp;
+    private String batch;//批次号
 
     private Date createTime;
+    private Date businessTime;//交易时间
 
 
-    public Long getUserId() {
+    public String getBatch() {
+		return batch;
+	}
+
+	public void setBatch(String batch) {
+		this.batch = batch;
+	}
+
+	public Date getBusinessTime() {
+		return businessTime;
+	}
+
+	public void setBusinessTime(Date businessTime) {
+		this.businessTime = businessTime;
+	}
+
+	public Long getUserId() {
         return userId;
     }
 
