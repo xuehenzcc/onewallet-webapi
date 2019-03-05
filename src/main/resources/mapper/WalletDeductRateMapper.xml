@@ -4,12 +4,12 @@
 
     <!--查询用户在通道的费率-->
     <select id="selectUserChannelRate" resultType="java.util.Map">
-        select t3.id, t3.channel_id channelId, t5.name channelName, t5.channel_type channelType, t5.remarks, t3.settle_type settleType, t3.deduct_rate deductRate, t3.poundage, t4.limit_min limitMin, t4.limit_max limitMax, t4.day_max dayMax from
+        select DISTINCT t3.id, t3.channel_id channelId, t5.name channelName, t5.channel_type channelType, t5.remarks, t3.settle_type settleType, t3.deduct_rate deductRate, t3.poundage, t4.limit_min limitMin, t4.limit_max limitMax, t4.day_max dayMax from
         (select * from zzlm_deduct_rate where deduct_type = 'mer' and user_type = #{userType}) t3
         inner join
         (select t1.channel_id, t1.settle_type, t1.limit_min, t1.limit_max, t1.day_max, t2.sort_time
         from zzlm_deduct_rate t1 left join zzlm_channel t2 on t1.channel_id = t2.id
-        where t1.deduct_type = 'channel' and t2.enable = '1'
+        where t1.deduct_type = 'mer' and t2.enable = '1'
         and t2.channel_type in
         <foreach collection="channelType" item="item" separator="," open="(" close=")">
           #{item}

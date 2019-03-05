@@ -250,6 +250,7 @@
 		 		</if>
 		 		<if test="item.userId != null">
 		 			user_id=#{item.userId},
+		 			remark2=(SELECT phone FROM wallet_user_info WHERE id=#{item.userId}),
 		 		</if>
 		 		update_time=now()
 		 	</set>

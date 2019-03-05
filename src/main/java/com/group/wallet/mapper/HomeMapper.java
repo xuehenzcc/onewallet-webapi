@@ -5,6 +5,7 @@
  */
 package com.group.wallet.mapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Component;

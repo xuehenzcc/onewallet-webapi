@@ -94,8 +94,10 @@ public class SettleServiceImpl implements SettleService {
         IncomeType incomeType = null;
         if(ChannelType.刷卡渠道.getValue().equals(channelType)){
             incomeType = IncomeType.刷卡收益;
+            Map<String, BigDecimal> mapByA=getUserTypeRate(channelId, "A", settleType);//个体商户费率
+            BigDecimal rate2 = mapByA.get("rate");
             //刷卡渠道补分润
-//            calculateLKLProfit(userInfo, rate, realTradeMoney, orderNum);
+            calculateLKLProfit(userInfo, rate,rate2, realTradeMoney, orderNum);
         }else {
             incomeType = IncomeType.快捷分润;
         }
@@ -256,13 +258,13 @@ public class SettleServiceImpl implements SettleService {
      * @param orderNum
      * update by zcc 2019-01-04
      */
-    private void calculateLKLProfit(WalletUserInfo userInfo, BigDecimal rate, BigDecimal realTradeMoney, String orderNum){
+    private void calculateLKLProfit(WalletUserInfo userInfo, BigDecimal rate,BigDecimal rate2, BigDecimal realTradeMoney, String orderNum){
     	String realNmae = StringReplaceUtil.userNameReplaceWithStar2(userInfo.getRealName());
         String phone = StringReplaceUtil.phoneReplaceWithStar(userInfo.getPhone());
         String userType1 = UserType.getEnumName(userInfo.getUserType());
         String desc = realNmae + " " + phone + " " + userType1;
         
-        BigDecimal rate2 = new BigDecimal("0.68");
+//        BigDecimal rate2 = new BigDecimal("0.68");
         BigDecimal balanceRate = rate2.subtract(rate);
         if(balanceRate.compareTo(BigDecimal.ZERO)>0){
             BigDecimal balanceMoney = balanceRate.multiply(realTradeMoney).multiply(new BigDecimal("0.01"));
