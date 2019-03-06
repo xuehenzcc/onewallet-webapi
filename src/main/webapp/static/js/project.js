@@ -3,7 +3,7 @@
  */
 
 var path = {
-  server:'http://api.wtlyhqb.com/onewallet-webapi',
+  server:'http://api.wtlyhqb.com/zzlm-webapi',
   api:{
     getToken:'/common/getToken',
     sendCode:'/common/h5SendSms',
